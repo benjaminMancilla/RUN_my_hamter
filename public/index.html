@@ -4,16 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RUN my hamter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --panel: rgba(15, 20, 32, 0.78);
-      --panel-border: rgba(255, 255, 255, 0.16);
-      --cream: #fffaf0;
-      --accent: #ffd166;
-      --accent-2: #ff7b54;
-      --shadow: rgba(0, 0, 0, 0.3);
-    }
-
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
@@ -24,11 +16,11 @@
       margin: 0;
       min-height: 100%;
       overflow: hidden;
-      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      font-family: "Press Start 2P", cursive;
       background:
-        radial-gradient(circle at top, rgba(255, 209, 102, 0.4), transparent 34%),
-        linear-gradient(180deg, #15213b 0%, #090d16 100%);
-      color: var(--cream);
+        radial-gradient(circle at top, rgba(255, 214, 231, 0.92), rgba(255, 179, 209, 0.84) 38%, rgba(224, 85, 154, 0.92) 100%),
+        linear-gradient(180deg, #ffd6e7 0%, #ffb3d1 100%);
+      color: #fff5f9;
     }
 
     body {
@@ -41,12 +33,13 @@
       position: relative;
       width: min(1180px, 96vw);
       height: min(760px, 92vh);
-      border-radius: 28px;
+      border-radius: 24px;
       overflow: hidden;
       box-shadow:
-        0 22px 70px rgba(0, 0, 0, 0.45),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-      background: #0f1726;
+        0 26px 0 rgba(224, 85, 154, 0.22),
+        0 34px 64px rgba(120, 32, 72, 0.34),
+        inset 0 0 0 4px rgba(255, 245, 249, 0.34);
+      background: #fff5f9;
       touch-action: none;
     }
 
@@ -54,174 +47,6 @@
       width: 100%;
       height: 100%;
       display: block;
-    }
-
-    .hud {
-      position: absolute;
-      inset: 0 0 auto 0;
-      padding: 16px;
-      z-index: 3;
-      pointer-events: none;
-      transition: opacity 180ms ease;
-    }
-
-    .hud.hidden {
-      opacity: 0;
-    }
-
-    .hud-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
-      font-size: 14px;
-      letter-spacing: 0.02em;
-      backdrop-filter: blur(12px);
-    }
-
-    .progress-track {
-      width: min(420px, 100%);
-      height: 16px;
-      border-radius: 999px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.18);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .progress-fill {
-      width: 0%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #ffe066 0%, #ff8a5b 55%, #ff477e 100%);
-      transition: width 160ms linear;
-    }
-
-    .overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 4;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      background: linear-gradient(180deg, rgba(7, 11, 19, 0.36), rgba(7, 11, 19, 0.78));
-    }
-
-    .overlay.hidden {
-      display: none;
-    }
-
-    .card {
-      width: min(560px, 100%);
-      padding: 28px;
-      border-radius: 28px;
-      background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)),
-        rgba(10, 16, 28, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 22px 80px rgba(0, 0, 0, 0.45);
-      text-align: center;
-      backdrop-filter: blur(18px);
-    }
-
-    .eyebrow {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 999px;
-      margin-bottom: 12px;
-      background: rgba(255, 209, 102, 0.18);
-      border: 1px solid rgba(255, 209, 102, 0.28);
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1;
-    }
-
-    p {
-      margin: 0 0 18px;
-      font-size: 1.05rem;
-      line-height: 1.5;
-      color: rgba(255, 250, 240, 0.9);
-    }
-
-    .button-row {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 16px;
-      padding: 14px 18px;
-      min-width: 150px;
-      font: inherit;
-      font-weight: 700;
-      color: #101522;
-      background: linear-gradient(180deg, #ffe082 0%, #ffb347 100%);
-      box-shadow: 0 12px 24px rgba(255, 179, 71, 0.28);
-      cursor: pointer;
-      transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
-    }
-
-    button:hover,
-    button:focus-visible {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 32px rgba(255, 179, 71, 0.32);
-      filter: brightness(1.03);
-      outline: none;
-    }
-
-    button.alt {
-      background: linear-gradient(180deg, #8fd3ff 0%, #5bb8ff 100%);
-      box-shadow: 0 12px 24px rgba(91, 184, 255, 0.24);
-    }
-
-    button.ghost {
-      color: var(--cream);
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: none;
-    }
-
-    .touch-note {
-      margin-top: 8px;
-      font-size: 0.92rem;
-      opacity: 0.8;
-    }
-
-    .gift-choice {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .gift-choice button {
-      min-width: 0;
-    }
-
-    .selected-gift {
-      margin-top: 12px;
-      font-weight: 700;
-      color: #ffe082;
     }
 
     @media (max-width: 720px) {
@@ -234,45 +59,12 @@
       body {
         padding: 0;
       }
-
-      .hud {
-        padding: 12px;
-      }
-
-      .hud-top {
-        align-items: stretch;
-      }
-
-      .progress-track {
-        width: 100%;
-      }
-
-      .card {
-        padding: 22px 18px;
-      }
-
-      .gift-choice {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
 <body>
   <div class="shell" id="shell">
     <canvas id="gameCanvas"></canvas>
-
-    <div class="hud hidden" id="hud">
-      <div class="hud-top">
-        <div class="pill" id="levelLabel"></div>
-        <div class="pill" id="scoreLabel"></div>
-        <div class="pill" id="livesLabel"></div>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </div>
-
-    <div class="overlay" id="overlay"></div>
   </div>
 
   <script>
@@ -334,16 +126,19 @@
     };
     const VAINA_ASPECT_RATIO = 388 / 1056;
     const FRAME_SIZE = 32;
+    const PINK_LIGHT = "#FFD6E7";
+    const PINK_MID = "#FFB3D1";
+    const PINK_DARK = "#FF80B5";
+    const PINK_DEEP = "#E0559A";
+    const CREAM = "#FFF5F9";
+    const PURPLE_SOFT = "#D4A8E0";
+    const YELLOW_SOFT = "#FFE8A3";
+    const SHADOW = "rgba(180, 60, 120, 0.25)";
+    const UI_CONFETTI_COLORS = [PINK_LIGHT, PINK_MID, PINK_DARK, PURPLE_SOFT, YELLOW_SOFT, CREAM];
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const shell = document.getElementById("shell");
-    const overlay = document.getElementById("overlay");
-    const hud = document.getElementById("hud");
-    const levelLabel = document.getElementById("levelLabel");
-    const scoreLabel = document.getElementById("scoreLabel");
-    const livesLabel = document.getElementById("livesLabel");
-    const progressFill = document.getElementById("progressFill");
 
     const sprites = {
       sunflower: new Image(),
@@ -365,6 +160,347 @@
     let totalAssets = 0;
     let loadedAssets = 0;
     let booted = false;
+    let choiceText = "";
+
+    function pixelText(context, text, x, y, size, color, options = {}) {
+      const lines = String(text).split("\n");
+      const lineHeight = options.lineHeight || Math.round(size * 1.65);
+      const totalHeight = lineHeight * (lines.length - 1);
+
+      context.save();
+      context.imageSmoothingEnabled = false;
+      context.font = `${size}px "Press Start 2P", cursive`;
+      context.textAlign = options.align || "center";
+      context.textBaseline = options.baseline || "middle";
+
+      lines.forEach((line, index) => {
+        const lineY = y + index * lineHeight - totalHeight / 2;
+
+        if (options.shadowColor) {
+          context.fillStyle = options.shadowColor;
+          context.fillText(
+            line,
+            x + (options.shadowOffsetX ?? 0),
+            lineY + (options.shadowOffsetY ?? 0)
+          );
+        }
+
+        context.fillStyle = color;
+        context.fillText(line, x, lineY);
+      });
+
+      context.restore();
+    }
+
+    function measurePixelLine(text, size) {
+      ctx.save();
+      ctx.font = `${size}px "Press Start 2P", cursive`;
+      const width = ctx.measureText(text).width;
+      ctx.restore();
+      return width;
+    }
+
+    function wrapPixelText(text, maxWidth, size) {
+      return String(text)
+        .split("\n")
+        .map((paragraph) => {
+          if (!paragraph) {
+            return "";
+          }
+
+          const words = paragraph.split(/\s+/);
+          const lines = [];
+          let currentLine = "";
+
+          for (const word of words) {
+            const candidate = currentLine ? `${currentLine} ${word}` : word;
+            if (!currentLine || measurePixelLine(candidate, size) <= maxWidth) {
+              currentLine = candidate;
+            } else {
+              lines.push(currentLine);
+              currentLine = word;
+            }
+          }
+
+          if (currentLine) {
+            lines.push(currentLine);
+          }
+
+          return lines.join("\n");
+        })
+        .join("\n");
+    }
+
+    function roundedRectPath(context, x, y, w, h, radius = 12) {
+      const r = Math.min(radius, w / 2, h / 2);
+      context.beginPath();
+      context.moveTo(x + r, y);
+      context.lineTo(x + w - r, y);
+      context.quadraticCurveTo(x + w, y, x + w, y + r);
+      context.lineTo(x + w, y + h - r);
+      context.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      context.lineTo(x + r, y + h);
+      context.quadraticCurveTo(x, y + h, x, y + h - r);
+      context.lineTo(x, y + r);
+      context.quadraticCurveTo(x, y, x + r, y);
+      context.closePath();
+    }
+
+    function drawPixelBorder(context, x, y, w, h, color = PINK_DEEP) {
+      const step = 4;
+      const x0 = Math.round(x);
+      const y0 = Math.round(y);
+      const x1 = Math.round(x + w);
+      const y1 = Math.round(y + h);
+
+      context.save();
+      context.fillStyle = color;
+
+      for (let px = x0 + step; px <= x1 - step * 2; px += step) {
+        context.fillRect(px, y0 - step, step, step);
+        context.fillRect(px, y1, step, step);
+      }
+
+      for (let py = y0 + step; py <= y1 - step * 2; py += step) {
+        context.fillRect(x0 - step, py, step, step);
+        context.fillRect(x1, py, step, step);
+      }
+
+      [
+        [x0 - step, y0 - step],
+        [x0, y0 - step],
+        [x0 - step, y0],
+        [x1 - step, y0 - step],
+        [x1, y0 - step],
+        [x1, y0],
+        [x0 - step, y1 - step],
+        [x0 - step, y1],
+        [x0, y1],
+        [x1 - step, y1],
+        [x1, y1 - step],
+        [x1, y1]
+      ].forEach(([px, py]) => {
+        context.fillRect(px, py, step, step);
+      });
+
+      context.restore();
+    }
+
+    function drawPanel(context, x, y, w, h, fill = CREAM) {
+      context.save();
+      context.shadowColor = SHADOW;
+      context.shadowOffsetX = 4;
+      context.shadowOffsetY = 4;
+      context.shadowBlur = 0;
+      roundedRectPath(context, x, y, w, h, 12);
+      context.fillStyle = fill;
+      context.fill();
+      context.shadowColor = "transparent";
+      context.lineWidth = 3;
+      context.strokeStyle = PINK_DARK;
+      context.stroke();
+      context.restore();
+
+      drawPixelBorder(context, x, y, w, h, PINK_DEEP);
+    }
+
+    function registerUIButton(id, x, y, w, h, meta = {}) {
+      gameState.uiButtons.push({ id, x, y, w, h, ...meta });
+    }
+
+    function drawButton(id, label, x, y, w, h, meta = {}) {
+      const hovered = gameState.hoverButtonId === id;
+
+      ctx.save();
+      ctx.shadowColor = SHADOW;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
+      ctx.shadowBlur = 0;
+      roundedRectPath(ctx, x, y, w, h, 12);
+      ctx.fillStyle = hovered ? PINK_DARK : (meta.fill || PINK_MID);
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = PINK_DEEP;
+      ctx.stroke();
+      ctx.restore();
+
+      drawPixelBorder(ctx, x, y, w, h, PINK_DEEP);
+      pixelText(ctx, label, x + w / 2, y + h / 2 + 1, meta.textSize || 8, CREAM);
+      registerUIButton(id, x, y, w, h, meta);
+    }
+
+    function pointInRect(x, y, rect) {
+      return x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h;
+    }
+
+    function buttonAtPoint(x, y) {
+      for (let index = gameState.uiButtons.length - 1; index >= 0; index -= 1) {
+        const button = gameState.uiButtons[index];
+        if (pointInRect(x, y, button)) {
+          return button;
+        }
+      }
+      return null;
+    }
+
+    function canvasPointFromEvent(event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: ((event.clientX - rect.left) / rect.width) * gameState.width,
+        y: ((event.clientY - rect.top) / rect.height) * gameState.height
+      };
+    }
+
+    function resetUiScreenState(mode = "none") {
+      gameState.uiButtons = [];
+      gameState.uiParticles = [];
+      gameState.uiParticleMode = mode;
+      gameState.uiSpawnTimer = 0;
+      gameState.hoverButtonId = "";
+    }
+
+    function spawnUIParticles(type, options = {}) {
+      const count = options.count ?? (type === "confetti" ? 16 : 4);
+      const originX = options.x ?? gameState.width * (0.35 + Math.random() * 0.3);
+      const originY = options.y ?? gameState.height * (0.35 + Math.random() * 0.3);
+      const spreadX = options.spreadX ?? 140;
+      const spreadY = options.spreadY ?? 80;
+
+      for (let index = 0; index < count; index += 1) {
+        const x = originX + (Math.random() - 0.5) * spreadX;
+        const y = originY + (Math.random() - 0.5) * spreadY;
+
+        if (type === "hearts") {
+          gameState.uiParticles.push({
+            type,
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 18,
+            vy: -(24 + Math.random() * 26),
+            life: 1.8 + Math.random() * 0.9,
+            maxLife: 2.6,
+            size: 12 + Math.random() * 4,
+            emoji: "❤️",
+            sway: Math.random() * Math.PI * 2
+          });
+          continue;
+        }
+
+        if (type === "stars") {
+          gameState.uiParticles.push({
+            type,
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 72,
+            vy: (Math.random() - 0.5) * 64,
+            life: 1 + Math.random() * 0.9,
+            maxLife: 1.9,
+            size: 10 + Math.random() * 4,
+            emoji: "✨",
+            sway: Math.random() * Math.PI * 2
+          });
+          continue;
+        }
+
+        gameState.uiParticles.push({
+          type: "confetti",
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 140,
+          vy: -40 + Math.random() * 120,
+          life: 1.1 + Math.random() * 0.8,
+          maxLife: 1.9,
+          size: 5 + Math.random() * 3,
+          color: randomChoice(UI_CONFETTI_COLORS),
+          rotation: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 8
+        });
+      }
+    }
+
+    function updateUiParticles(dt) {
+      if (gameState.uiParticleMode === "hearts") {
+        gameState.uiSpawnTimer -= dt;
+        if (gameState.uiSpawnTimer <= 0) {
+          spawnUIParticles("hearts", {
+            count: 2,
+            x: gameState.width * (0.42 + Math.random() * 0.16),
+            y: gameState.height * 0.74,
+            spreadX: 180,
+            spreadY: 24
+          });
+          gameState.uiSpawnTimer = 0.28;
+        }
+      } else if (gameState.uiParticleMode === "stars") {
+        gameState.uiSpawnTimer -= dt;
+        if (gameState.uiSpawnTimer <= 0) {
+          spawnUIParticles("stars", {
+            count: 2,
+            x: gameState.width * (0.3 + Math.random() * 0.4),
+            y: gameState.height * (0.28 + Math.random() * 0.28),
+            spreadX: 220,
+            spreadY: 140
+          });
+          gameState.uiSpawnTimer = 0.4;
+        }
+      } else if (gameState.uiParticleMode === "final") {
+        gameState.uiSpawnTimer -= dt;
+        if (gameState.uiSpawnTimer <= 0) {
+          spawnUIParticles(Math.random() < 0.5 ? "hearts" : "confetti", {
+            count: 4,
+            x: gameState.width * 0.5,
+            y: gameState.height * 0.26,
+            spreadX: 240,
+            spreadY: 100
+          });
+          gameState.uiSpawnTimer = 0.3;
+        }
+      }
+
+      for (let index = gameState.uiParticles.length - 1; index >= 0; index -= 1) {
+        const particle = gameState.uiParticles[index];
+        particle.life -= dt;
+        particle.x += particle.vx * dt;
+        particle.y += particle.vy * dt;
+
+        if (particle.type === "hearts") {
+          particle.sway += dt * 2.4;
+          particle.x += Math.sin(particle.sway) * 10 * dt;
+        } else if (particle.type === "stars") {
+          particle.sway += dt * 3.1;
+          particle.y += Math.cos(particle.sway) * 8 * dt;
+        } else {
+          particle.rotation += particle.spin * dt;
+          particle.vy += 26 * dt;
+        }
+
+        if (particle.life <= 0) {
+          gameState.uiParticles.splice(index, 1);
+        }
+      }
+    }
+
+    function drawUiParticles() {
+      for (const particle of gameState.uiParticles) {
+        const alpha = Math.max(0, particle.life / particle.maxLife);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        if (particle.type === "confetti") {
+          ctx.translate(particle.x, particle.y);
+          ctx.rotate(particle.rotation);
+          ctx.fillStyle = particle.color;
+          ctx.fillRect(-particle.size / 2, -particle.size / 2, particle.size, particle.size);
+          ctx.restore();
+          continue;
+        }
+
+        pixelText(ctx, particle.emoji, particle.x, particle.y, particle.size, CREAM);
+        ctx.restore();
+      }
+    }
 
     function handleAssetReady() {
       loadedAssets += 1;
@@ -420,7 +556,9 @@
       spawnCooldown: 0,
       starSpawnTimer: 0,
       snowballSpawnTimer: 0,
-      selectedGift: "",
+      uiSpawnTimer: 0,
+      uiParticleMode: "none",
+      hoverButtonId: "",
       input: {
         holding: false
       },
@@ -435,6 +573,8 @@
       },
       objects: [],
       particles: [],
+      uiParticles: [],
+      uiButtons: [],
       levels: cloneLevels(false),
       frames: {
         hamster: 0,
@@ -499,8 +639,9 @@
       gameState.totalScore = 0;
       gameState.levelScore = 0;
       gameState.lives = 3;
-      gameState.selectedGift = "";
+      choiceText = "";
       gameState.screen = "playing";
+      resetUiScreenState("none");
       resetRunState();
       hideOverlay();
       syncHud();
@@ -509,7 +650,9 @@
     function startNextLevel() {
       gameState.levelIndex += 1;
       gameState.levelScore = 0;
+      choiceText = "";
       gameState.screen = "playing";
+      resetUiScreenState("none");
       resetRunState();
       hideOverlay();
       syncHud();
@@ -517,6 +660,7 @@
 
     function resumeGame() {
       gameState.screen = "playing";
+      resetUiScreenState("none");
       hideOverlay();
       syncHud();
     }
@@ -524,7 +668,9 @@
     function jumpToLevel(levelIndex) {
       gameState.levelIndex = Math.max(0, Math.min(gameState.levels.length - 1, levelIndex));
       gameState.levelScore = 0;
+      choiceText = "";
       gameState.screen = "playing";
+      resetUiScreenState("none");
       resetRunState();
       hideOverlay();
       syncHud();
@@ -535,20 +681,33 @@
     }
 
     function syncHud() {
-      const level = currentLevel();
-      const progress = Math.min(1, gameState.levelScore / level.pointsNeeded);
-      hud.classList.toggle("hidden", gameState.screen !== "playing");
-      levelLabel.textContent = `Nivel ${gameState.levelIndex + 1}/${gameState.levels.length} · ${level.theme}`;
-      scoreLabel.textContent = `Puntos ${gameState.levelScore}/${level.pointsNeeded} · Total ${gameState.totalScore}`;
-      livesLabel.textContent = `Vidas ${"❤️".repeat(gameState.lives)}${"🩶".repeat(3 - gameState.lives)}`;
-      progressFill.style.width = `${progress * 100}%`;
+    }
+
+    function chooseFinalGift(gift) {
+      choiceText = gift === "🎵 Tocadiscos"
+        ? "Elegiste el tocadiscos.\nPronto van tus\n4 recuerdos aqui 🎶"
+        : "Elegiste la parka.\nPronto van tus\n4 recuerdos aqui 🧥";
+      spawnUIParticles("hearts", {
+        count: 10,
+        x: gameState.width * 0.5,
+        y: gameState.height * 0.28,
+        spreadX: 260,
+        spreadY: 80
+      });
+      spawnUIParticles("confetti", {
+        count: 26,
+        x: gameState.width * 0.5,
+        y: gameState.height * 0.28,
+        spreadX: 320,
+        spreadY: 120
+      });
     }
 
     function showStartScreen() {
       gameState.fastMode = false;
       gameState.levelIndex = 0;
       gameState.levels = cloneLevels(false);
-      gameState.selectedGift = "";
+      choiceText = "";
       gameState.screen = "start";
       gameState.objects = [];
       gameState.particles = [];
@@ -556,107 +715,102 @@
       gameState.animTime = 0;
       gameState.input.holding = false;
       resetHamsterPosition();
-      hud.classList.add("hidden");
-      overlay.classList.remove("hidden");
-      overlay.innerHTML = `
-        <div class="card">
-          <div class="eyebrow">RUN my hamter</div>
-          <h1>🐹 A volar</h1>
-          <p>
-            Mantén <strong>Espacio</strong> o toca la pantalla para subir.
-            Suelta para caer con gravedad. Recolecta sprites, evita obstáculos y completa 3 niveles.
-          </p>
-          <div class="button-row">
-            <button data-action="start">Jugar</button>
-            <button class="alt" data-action="fast">Modo Rápido</button>
-          </div>
-          <p class="touch-note">Modo Rápido reduce a la mitad los puntos necesarios en todos los niveles.</p>
-        </div>
-      `;
+      updateAnimationFrames();
+      resetUiScreenState("hearts");
+      spawnUIParticles("hearts", {
+        count: 10,
+        x: gameState.width * 0.5,
+        y: gameState.height * 0.7,
+        spreadX: 260,
+        spreadY: 40
+      });
     }
 
     function showGameOverScreen() {
       gameState.screen = "gameover";
       gameState.input.holding = false;
-      hud.classList.add("hidden");
-      overlay.classList.remove("hidden");
-      overlay.innerHTML = `
-        <div class="card">
-          <div class="eyebrow">Game Over</div>
-          <h1>💥 Hamter no pudo más</h1>
-          <p>Sumaste ${gameState.totalScore} puntos y llegaste al nivel ${gameState.levelIndex + 1}.</p>
-          <div class="button-row">
-            <button data-action="retry">Reintentar</button>
-            <button class="ghost" data-action="menu">Menú</button>
-          </div>
-        </div>
-      `;
+      resetUiScreenState("stars");
+      spawnUIParticles("stars", {
+        count: 12,
+        x: gameState.width * 0.5,
+        y: gameState.height * 0.32,
+        spreadX: 260,
+        spreadY: 160
+      });
     }
 
     function showRewardScreen() {
       const level = currentLevel();
       gameState.screen = "reward";
       gameState.input.holding = false;
-      hud.classList.add("hidden");
-      overlay.classList.remove("hidden");
 
       if (level.isFinal) {
-        overlay.innerHTML = `
-          <div class="card">
-            <div class="eyebrow">Nivel Final Superado</div>
-            <h1>${level.theme}</h1>
-            <p>${level.reward}</p>
-            <div class="gift-choice">
-              <button data-gift="🎵 Tocadiscos">🎵 Tocadiscos</button>
-              <button class="alt" data-gift="🧥 Parka">🧥 Parka</button>
-            </div>
-            ${gameState.selectedGift ? `<div class="selected-gift">Elegiste: ${gameState.selectedGift}</div>` : ""}
-            <div class="button-row">
-              <button data-action="retry">Jugar otra vez</button>
-              <button class="ghost" data-action="menu">Menú</button>
-            </div>
-          </div>
-        `;
+        resetUiScreenState("final");
+        spawnUIParticles("hearts", {
+          count: 12,
+          x: gameState.width * 0.5,
+          y: gameState.height * 0.26,
+          spreadX: 300,
+          spreadY: 120
+        });
+        spawnUIParticles("confetti", {
+          count: 24,
+          x: gameState.width * 0.5,
+          y: gameState.height * 0.26,
+          spreadX: 320,
+          spreadY: 120
+        });
         return;
       }
 
-      overlay.innerHTML = `
-        <div class="card">
-          <div class="eyebrow">Recompensa</div>
-          <h1>${level.theme}</h1>
-          <p>${level.reward}</p>
-          <div class="button-row">
-            <button data-action="continue">Continuar</button>
-          </div>
-        </div>
-      `;
+      resetUiScreenState("none");
+      spawnUIParticles("confetti", {
+        count: 26,
+        x: gameState.width * 0.5,
+        y: gameState.height * 0.28,
+        spreadX: 240,
+        spreadY: 110
+      });
     }
 
     function showPauseScreen() {
       gameState.screen = "paused";
       gameState.input.holding = false;
-      hud.classList.add("hidden");
-      overlay.classList.remove("hidden");
-      overlay.innerHTML = `
-        <div class="card">
-          <div class="eyebrow">Pausa</div>
-          <h1>${currentLevel().theme}</h1>
-          <p>Elige qué hacer con la partida actual.</p>
-          <div class="button-row">
-            <button data-action="resume">Reanudar</button>
-            <button class="ghost" data-action="menu">Salir</button>
-          </div>
-          <div class="gift-choice">
-            <button data-action="level" data-level-index="0">Nivel 1</button>
-            <button class="alt" data-action="level" data-level-index="1">Nivel 2</button>
-            <button class="ghost" data-action="level" data-level-index="2">Nivel 3</button>
-          </div>
-        </div>
-      `;
+      resetUiScreenState("none");
     }
 
     function hideOverlay() {
-      overlay.classList.add("hidden");
+    }
+
+    function handleUiAction(button) {
+      if (!button) {
+        return;
+      }
+
+      gameState.hoverButtonId = button.id;
+
+      if (button.action === "level") {
+        jumpToLevel(Number(button.levelIndex));
+        return;
+      }
+
+      if (button.action === "start") {
+        startGame(false);
+      } else if (button.action === "fast") {
+        startGame(true);
+      } else if (button.action === "continue") {
+        startNextLevel();
+      } else if (button.action === "resume") {
+        resumeGame();
+      } else if (button.action === "retry") {
+        retryGame();
+      } else if (button.action === "restart") {
+        jumpToLevel(gameState.levelIndex);
+      } else if (button.action === "menu") {
+        showStartScreen();
+      } else if (button.action === "gift") {
+        chooseFinalGift(button.gift);
+      }
     }
 
     function drawStaticSprite(key, cx, cy, width, height = width) {
@@ -996,11 +1150,12 @@
       }
     }
 
-    function drawBackground() {
-      ctx.fillStyle = "#08111d";
+    function drawBackground(offset = gameState.worldOffset, levelIndex = gameState.levelIndex) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = "#1f1221";
       ctx.fillRect(0, 0, gameState.width, gameState.height);
 
-      const layers = bgLayers[gameState.levelIndex] || bgLayers[0];
+      const layers = bgLayers[levelIndex] || bgLayers[0];
       const divisor = Math.max(1, layers.length - 1);
 
       layers.forEach((image, index) => {
@@ -1009,7 +1164,7 @@
         }
 
         const speed = 0.05 + (index / divisor) * 0.55;
-        const x = -((gameState.worldOffset * speed) % gameState.width);
+        const x = -((offset * speed) % gameState.width);
         ctx.drawImage(image, x, 0, gameState.width, gameState.height);
         ctx.drawImage(image, x + gameState.width, 0, gameState.width, gameState.height);
         if (x > 0) {
@@ -1111,11 +1266,294 @@
       }
     }
 
-    function drawScene() {
+    function drawVignetteOverlay() {
+      const gradient = ctx.createRadialGradient(
+        gameState.width * 0.5,
+        gameState.height * 0.42,
+        gameState.width * 0.14,
+        gameState.width * 0.5,
+        gameState.height * 0.5,
+        gameState.width * 0.72
+      );
+      gradient.addColorStop(0, "rgba(255, 214, 231, 0.02)");
+      gradient.addColorStop(0.58, "rgba(224, 85, 154, 0.14)");
+      gradient.addColorStop(1, "rgba(180, 60, 120, 0.35)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, gameState.width, gameState.height);
+    }
+
+    function drawTintOverlay(alpha = 0.45) {
+      ctx.fillStyle = `rgba(180, 60, 120, ${alpha})`;
+      ctx.fillRect(0, 0, gameState.width, gameState.height);
+    }
+
+    function drawHud() {
+      const level = currentLevel();
+      const progress = Math.min(1, gameState.levelScore / level.pointsNeeded);
+
+      ctx.fillStyle = "rgba(255,214,231,0.82)";
+      ctx.fillRect(0, 0, gameState.width, 48);
+      ctx.fillStyle = PINK_LIGHT;
+      ctx.fillRect(0, 48, gameState.width, 6);
+      ctx.fillStyle = PINK_DARK;
+      ctx.fillRect(0, 48, gameState.width * progress, 6);
+
+      drawAnimatedSprite("hamster", gameState.frames.hamster, 24, 24, 28);
+      pixelText(ctx, "❤️".repeat(gameState.lives), 48, 24, 14, PINK_DEEP, { align: "left" });
+      pixelText(ctx, level.theme, gameState.width * 0.5, 24, 6, PINK_DEEP);
+      pixelText(
+        ctx,
+        `PTS: ${String(gameState.totalScore).padStart(3, "0")}`,
+        gameState.width - 18,
+        24,
+        7,
+        PINK_DEEP,
+        { align: "right" }
+      );
+    }
+
+    function drawStartScreen() {
+      drawVignetteOverlay();
+      drawUiParticles();
+
+      const panelW = Math.min(480, gameState.width - 32);
+      const panelH = Math.min(380, gameState.height - 40);
+      const panelX = (gameState.width - panelW) / 2;
+      const panelY = (gameState.height - panelH) / 2;
+      const centerX = panelX + panelW / 2;
+      const titleSize = gameState.width < 600 ? 16 : 20;
+      const hamsterY = panelY + 82;
+      const buttonW = Math.min(200, panelW - 44);
+      const buttonH = 44;
+
+      drawPanel(ctx, panelX, panelY, panelW, panelH);
+
+      ctx.save();
+      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = PINK_MID;
+      ctx.beginPath();
+      ctx.arc(centerX, hamsterY, 56, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      drawAnimatedSprite("hamster", gameState.frames.hamster, centerX, hamsterY, 96);
+      pixelText(ctx, "HAMSTER\nRUN", centerX, panelY + 156, titleSize, PINK_DEEP, {
+        shadowColor: PINK_LIGHT,
+        shadowOffsetX: 2,
+        shadowOffsetY: 2,
+        lineHeight: titleSize + 10
+      });
+      pixelText(ctx, "un regalo para ti 🎀", centerX, panelY + 220, 7, PURPLE_SOFT);
+
+      const buttonX = centerX - buttonW / 2;
+      drawButton("start-main", "▶ JUGAR", buttonX, panelY + 236, buttonW, buttonH, {
+        action: "start"
+      });
+      drawButton("start-fast", "⚡ MODO RÁPIDO", buttonX, panelY + 292, buttonW, buttonH, {
+        action: "fast",
+        textSize: 7
+      });
+
+      if (Math.floor(gameState.animTime / 0.8) % 2 === 0) {
+        pixelText(ctx, "ESPACIO / TAP para volar", centerX, panelY + panelH - 20, 6, PINK_DARK);
+      }
+    }
+
+    function drawPauseScreen() {
+      drawTintOverlay(0.45);
+      drawUiParticles();
+
+      const panelW = Math.min(360, gameState.width - 30);
+      const panelH = Math.min(260, gameState.height - 40);
+      const panelX = (gameState.width - panelW) / 2;
+      const panelY = (gameState.height - panelH) / 2;
+      const centerX = panelX + panelW / 2;
+      const buttonW = Math.min(220, panelW - 50);
+
+      drawPanel(ctx, panelX, panelY, panelW, panelH);
+      pixelText(ctx, "PAUSA", centerX, panelY + 40, 16, PINK_DEEP);
+      drawAnimatedSprite("hamster", 0, centerX, panelY + 98, 64);
+      drawButton("pause-resume", "▶ CONTINUAR", centerX - buttonW / 2, panelY + 138, buttonW, 40, {
+        action: "resume"
+      });
+      drawButton("pause-restart", "↩ REINICIAR", centerX - buttonW / 2, panelY + 188, buttonW, 40, {
+        action: "restart"
+      });
+      pixelText(ctx, "ESC para continuar", centerX, panelY + panelH - 22, 6, PURPLE_SOFT);
+
+      const footerY = panelY + panelH + 14;
+      if (footerY + 28 <= gameState.height - 8) {
+        drawButton("pause-menu", "MENU", centerX - 132, footerY, 84, 28, {
+          action: "menu",
+          textSize: 6
+        });
+        drawButton("pause-level-1", "N1", centerX - 36, footerY, 44, 28, {
+          action: "level",
+          levelIndex: 0,
+          textSize: 6
+        });
+        drawButton("pause-level-2", "N2", centerX + 18, footerY, 44, 28, {
+          action: "level",
+          levelIndex: 1,
+          textSize: 6
+        });
+        drawButton("pause-level-3", "N3", centerX + 72, footerY, 44, 28, {
+          action: "level",
+          levelIndex: 2,
+          textSize: 6
+        });
+      }
+    }
+
+    function drawGameOverScreen() {
+      drawTintOverlay(0.45);
+      drawUiParticles();
+
+      const panelW = Math.min(380, gameState.width - 30);
+      const panelH = Math.min(280, gameState.height - 40);
+      const panelX = (gameState.width - panelW) / 2;
+      const panelY = (gameState.height - panelH) / 2;
+      const centerX = panelX + panelW / 2;
+
+      drawPanel(ctx, panelX, panelY, panelW, panelH);
+      pixelText(ctx, "GAME OVER", centerX, panelY + 48, 16, PINK_DEEP, {
+        shadowColor: PINK_LIGHT,
+        shadowOffsetX: 2,
+        shadowOffsetY: 2
+      });
+      pixelText(ctx, "el hamster se cayó... 🐹", centerX, panelY + 98, 7, PURPLE_SOFT);
+      pixelText(ctx, `PUNTOS: ${gameState.totalScore}`, centerX, panelY + 146, 8, PINK_DARK);
+      drawButton("gameover-retry", "↩ REINTENTAR", centerX - 100, panelY + 186, 200, 44, {
+        action: "retry"
+      });
+      drawButton("gameover-menu", "MENU", centerX - 58, panelY + 238, 116, 28, {
+        action: "menu",
+        textSize: 6
+      });
+    }
+
+    function drawRewardScreenPanel() {
+      const level = currentLevel();
+      drawTintOverlay(0.4);
+      drawUiParticles();
+
+      const panelW = Math.min(440, gameState.width - 30);
+      const panelH = Math.min(320, gameState.height - 40);
+      const panelX = (gameState.width - panelW) / 2;
+      const panelY = (gameState.height - panelH) / 2;
+      const centerX = panelX + panelW / 2;
+      const message = wrapPixelText(level.reward, panelW - 70, 8);
+
+      drawPanel(ctx, panelX, panelY, panelW, panelH);
+      drawAnimatedSprite("hamster", gameState.frames.hamster, centerX, panelY + 80, 80);
+      pixelText(ctx, "¡NIVEL COMPLETO!", centerX, panelY + 146, 11, PINK_DEEP);
+      pixelText(ctx, message, centerX, panelY + 206, 8, PURPLE_SOFT, {
+        lineHeight: 18
+      });
+      drawButton("reward-next", "SIGUIENTE NIVEL ▶", centerX - 132, panelY + 260, 264, 44, {
+        action: "continue"
+      });
+    }
+
+    function drawPhotoPlaceholders(panelX, startY, panelW, forcedBoxSize) {
+      const boxSize = forcedBoxSize || Math.min(100, Math.floor((panelW - 54) / 4));
+      const gap = Math.floor((panelW - boxSize * 4) / 5);
+      let x = panelX + gap;
+
+      for (let index = 0; index < 4; index += 1) {
+        drawPanel(ctx, x, startY, boxSize, boxSize, "rgba(255, 245, 249, 0.88)");
+        pixelText(ctx, `F${index + 1}`, x + boxSize / 2, startY + boxSize / 2, 10, PURPLE_SOFT);
+        x += boxSize + gap;
+      }
+    }
+
+    function drawFinalRewardScreen() {
+      drawTintOverlay(0.4);
+      drawUiParticles();
+
+      const panelW = Math.min(480, gameState.width - 28);
+      const panelH = Math.min(400, gameState.height - 36);
+      const panelX = (gameState.width - panelW) / 2;
+      const panelY = (gameState.height - panelH) / 2;
+      const centerX = panelX + panelW / 2;
+      const footerY = panelY + panelH - 50;
+
+      drawPanel(ctx, panelX, panelY, panelW, panelH);
+      pixelText(ctx, "¡LO LOGRASTE! 🎀", centerX, panelY + 46, 13, PINK_DEEP);
+      pixelText(ctx, "Gracias por jugar\neste juego hecho\ncon mucho amor 💕", centerX, panelY + 108, 7, PURPLE_SOFT, {
+        lineHeight: 18
+      });
+
+      if (!choiceText) {
+        const buttonW = Math.min(180, (panelW - 52) / 2);
+        const leftX = centerX - buttonW - 10;
+        const rightX = centerX + 10;
+        drawButton("gift-record", "🎵 Tocadiscos", leftX, panelY + 176, buttonW, 56, {
+          action: "gift",
+          gift: "🎵 Tocadiscos",
+          textSize: 7
+        });
+        drawButton("gift-parka", "🧥 Parka", rightX, panelY + 176, buttonW, 56, {
+          action: "gift",
+          gift: "🧥 Parka",
+          textSize: 7
+        });
+      } else {
+        const photoBoxSize = Math.min(100, Math.floor((panelW - 54) / 4));
+        const photoY = footerY - photoBoxSize - 18;
+        pixelText(ctx, choiceText, centerX, Math.min(panelY + 190, photoY - 46), 7, PINK_DARK, {
+          lineHeight: 18
+        });
+        drawPhotoPlaceholders(panelX, photoY, panelW, photoBoxSize);
+      }
+
+      drawButton("final-retry", "REJUGAR", centerX - 136, footerY, 128, 36, {
+        action: "retry",
+        textSize: 6
+      });
+      drawButton("final-menu", "MENU", centerX + 8, footerY, 104, 36, {
+        action: "menu",
+        textSize: 6
+      });
+    }
+
+    function drawGameplayScene() {
       drawBackground();
       drawObjects();
       drawParticles();
       drawHamster();
+    }
+
+    function drawScene() {
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, gameState.width, gameState.height);
+      gameState.uiButtons = [];
+
+      if (gameState.screen === "start") {
+        drawBackground(0, 0);
+        drawStartScreen();
+        return;
+      }
+
+      if (gameState.screen === "reward") {
+        drawBackground(gameState.worldOffset, gameState.levelIndex);
+        if (currentLevel().isFinal) {
+          drawFinalRewardScreen();
+        } else {
+          drawRewardScreenPanel();
+        }
+        return;
+      }
+
+      drawGameplayScene();
+
+      if (gameState.screen === "playing") {
+        drawHud();
+      } else if (gameState.screen === "paused") {
+        drawPauseScreen();
+      } else if (gameState.screen === "gameover") {
+        drawGameOverScreen();
+      }
     }
 
     function loop(now) {
@@ -1126,6 +1564,12 @@
         gameState.animTime += dt;
         updateAnimationFrames();
         updatePlaying(dt);
+      } else if (gameState.screen !== "loading") {
+        if (gameState.screen !== "paused") {
+          gameState.animTime += dt;
+          updateAnimationFrames();
+        }
+        updateUiParticles(dt);
       }
 
       drawScene();
@@ -1142,6 +1586,7 @@
       gameState.lastTime = performance.now();
       resizeCanvas();
       showStartScreen();
+      drawScene();
       requestAnimationFrame(loop);
     }
 
@@ -1169,44 +1614,40 @@
       gameState.input.holding = false;
     }
 
-    overlay.addEventListener("click", (event) => {
-      const actionButton = event.target.closest("button[data-action]");
-      const giftButton = event.target.closest("button[data-gift]");
-
-      if (giftButton) {
-        gameState.selectedGift = giftButton.getAttribute("data-gift");
-        showRewardScreen();
+    function updateHoveredButton(point) {
+      if (gameState.screen === "playing") {
+        gameState.hoverButtonId = "";
         return;
       }
 
-      if (!actionButton) {
-        return;
-      }
-
-      const action = actionButton.getAttribute("data-action");
-      if (action === "level") {
-        jumpToLevel(Number(actionButton.getAttribute("data-level-index")));
-        return;
-      }
-
-      if (action === "start") {
-        startGame(false);
-      } else if (action === "fast") {
-        startGame(true);
-      } else if (action === "continue") {
-        startNextLevel();
-      } else if (action === "resume") {
-        resumeGame();
-      } else if (action === "retry") {
-        retryGame();
-      } else if (action === "menu") {
-        showStartScreen();
-      }
-    });
+      const button = buttonAtPoint(point.x, point.y);
+      gameState.hoverButtonId = button ? button.id : "";
+    }
 
     canvas.addEventListener("pointerdown", (event) => {
       event.preventDefault();
-      handlePress();
+      const point = canvasPointFromEvent(event);
+
+      if (gameState.screen === "playing") {
+        handlePress();
+        return;
+      }
+
+      updateHoveredButton(point);
+      handleUiAction(buttonAtPoint(point.x, point.y));
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      if (gameState.screen === "playing") {
+        return;
+      }
+
+      updateHoveredButton(canvasPointFromEvent(event));
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+      gameState.hoverButtonId = "";
+      handleRelease();
     });
 
     window.addEventListener("pointerup", handleRelease);
@@ -1245,7 +1686,10 @@
       }
     });
 
-    window.addEventListener("blur", handleRelease);
+    window.addEventListener("blur", () => {
+      gameState.hoverButtonId = "";
+      handleRelease();
+    });
     window.addEventListener("resize", resizeCanvas);
   </script>
 </body>
