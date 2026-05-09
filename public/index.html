@@ -74,21 +74,21 @@
         collectSprites: ["sunflower", "seed"],
         obstacleType: "vaina",
         pointsNeeded: 20,
-        reward: "¡Conseguiste flores! 🌸"
+        reward: "¡Girasoles para mi hamter!!! 🌸"
       },
       {
         theme: "🍬 Golosinas",
         collectSprites: ["cinamon", "dorito"],
         obstacleType: "star",
         pointsNeeded: 25,
-        reward: "¡Conseguiste golosinas! 🍬"
+        reward: "¡Doritos? tipico de la hamter! 🍬"
       },
       {
         theme: "🌨️ Piito",
         collectSprites: ["feather", "note"],
         obstacleType: "snowball",
         pointsNeeded: 30,
-        reward: "¡Elige tu regalo! 🎁",
+        reward: "Elija su regalo miamor <3 🎁",
         isFinal: true
       }
     ];
@@ -135,9 +135,9 @@
     const YELLOW_SOFT = "#FFE8A3";
     const SHADOW = "rgba(180, 60, 120, 0.25)";
     const UI_CONFETTI_COLORS = [PINK_LIGHT, PINK_MID, PINK_DARK, PURPLE_SOFT, YELLOW_SOFT, CREAM];
-    const GIFT_TEXT_TOCADISCOS = "Texto pendiente para el tocadiscos. Aqui va el mensaje final que quieras dejar para este regalo.";
-    const GIFT_TEXT_PARKA = "Texto pendiente para la parka. Aqui va el mensaje final que quieras dejar para este regalo.";
-    const GIFT_TEXT_GENERAL = "Gracias por jugar y llegar hasta aqui. Este espacio queda listo para completar el cierre con tus fotos y tu mensaje final.";
+    const GIFT_TEXT_TOCADISCOS = "Yo se que hace tiempo lo quiere (queremos) miamor, asi que ya toca hacernos music geeks. Sin vinilo incluido si (a menos que sea el OST del persona 5).";
+    const GIFT_TEXT_PARKA = "Me quedo piola aca por siaca pero se lo util que le puede ser una buena parca, ademas de que sufre de tanto piito. Su buen pelaje hamter.";
+    const GIFT_TEXT_GENERAL = "Gracias por jugar mi amorcito, te deseo un feliz cumpleaños (cuarto de siglo uuuuu) y espero que este jueguito te haya gustado, lo hice con mucho amor para ti <3 (hasta las 5 am 7w7). Te amo mucho mi hamster, espero que podamos seguir compartiendo muchos momentos juntos. Con amor, en gran whiskol alias, SLDF_Rataflautas, alias susovo.";
     const AudioManager = {
       tracks: {},
       current: null,
@@ -1561,7 +1561,7 @@
         shadowOffsetY: 2,
         lineHeight: titleSize + 10
       });
-      pixelText(ctx, "un regalo para ti 🎀", centerX, panelY + 220, 7, PURPLE_SOFT);
+      pixelText(ctx, "un regalo para la hamter mas conocida como la hamsters 🎀", centerX, panelY + 220, 7, PURPLE_SOFT);
 
       const buttonX = centerX - buttonW / 2;
       drawButton("start-main", "▶ JUGAR", buttonX, panelY + 236, buttonW, buttonH, {
@@ -1639,7 +1639,7 @@
         shadowOffsetX: 2,
         shadowOffsetY: 2
       });
-      pixelText(ctx, "el hamster se cayó... 🐹", centerX, panelY + 98, 7, PURPLE_SOFT);
+      pixelText(ctx, "se fue a la chuchita mi hamter... D:", centerX, panelY + 98, 7, PURPLE_SOFT);
       pixelText(ctx, `PUNTOS: ${gameState.totalScore}`, centerX, panelY + 146, 8, PINK_DARK);
       drawButton("gameover-retry", "↩ REINTENTAR", centerX - 100, panelY + 186, 200, 44, {
         action: "retry"
