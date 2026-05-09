@@ -135,6 +135,9 @@
     const YELLOW_SOFT = "#FFE8A3";
     const SHADOW = "rgba(180, 60, 120, 0.25)";
     const UI_CONFETTI_COLORS = [PINK_LIGHT, PINK_MID, PINK_DARK, PURPLE_SOFT, YELLOW_SOFT, CREAM];
+    const GIFT_TEXT_TOCADISCOS = "Texto pendiente para el tocadiscos. Aqui va el mensaje final que quieras dejar para este regalo.";
+    const GIFT_TEXT_PARKA = "Texto pendiente para la parka. Aqui va el mensaje final que quieras dejar para este regalo.";
+    const GIFT_TEXT_GENERAL = "Gracias por jugar y llegar hasta aqui. Este espacio queda listo para completar el cierre con tus fotos y tu mensaje final.";
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -156,11 +159,11 @@
       deco: DECO_SPRITE_FILES.map(() => new Image())
     };
     const bgLayers = BACKGROUND_LAYER_COUNTS.map((count) => Array.from({ length: count }, () => new Image()));
+    const photos = Array.from({ length: 4 }, () => new Image());
 
     let totalAssets = 0;
     let loadedAssets = 0;
     let booted = false;
-    let choiceText = "";
 
     function pixelText(context, text, x, y, size, color, options = {}) {
       const lines = String(text).split("\n");
@@ -286,7 +289,7 @@
       context.restore();
     }
 
-    function drawPanel(context, x, y, w, h, fill = CREAM) {
+    function drawPanel(context, x, y, w, h, fill = CREAM, borderColor = PINK_DARK, borderWidth = 3) {
       context.save();
       context.shadowColor = SHADOW;
       context.shadowOffsetX = 4;
@@ -296,8 +299,8 @@
       context.fillStyle = fill;
       context.fill();
       context.shadowColor = "transparent";
-      context.lineWidth = 3;
-      context.strokeStyle = PINK_DARK;
+      context.lineWidth = borderWidth;
+      context.strokeStyle = borderColor;
       context.stroke();
       context.restore();
 
@@ -450,11 +453,11 @@
           spawnUIParticles(Math.random() < 0.5 ? "hearts" : "confetti", {
             count: 4,
             x: gameState.width * 0.5,
-            y: gameState.height * 0.26,
-            spreadX: 240,
-            spreadY: 100
+            y: gameState.height * 0.42,
+            spreadX: 320,
+            spreadY: 220
           });
-          gameState.uiSpawnTimer = 0.3;
+          gameState.uiSpawnTimer = 0.24;
         }
       }
 
@@ -539,6 +542,9 @@
         queueImage(image, `bg/level${levelIndex + 1}/${layerIndex + 1}.png`);
       });
     });
+    photos.forEach((image, index) => {
+      queueImage(image, `photos/${index + 1}.png`);
+    });
 
     const gameState = {
       screen: "loading",
@@ -547,6 +553,7 @@
       totalScore: 0,
       levelScore: 0,
       lives: 3,
+      chosenGift: "",
       lastTime: performance.now(),
       animTime: 0,
       width: 0,
@@ -559,6 +566,10 @@
       uiSpawnTimer: 0,
       uiParticleMode: "none",
       hoverButtonId: "",
+      giftReveal: {
+        timer: 0,
+        confettiBurst: false
+      },
       input: {
         holding: false
       },
@@ -619,6 +630,11 @@
       gameState.hamster.radius = gameState.hamster.size * 0.42;
     }
 
+    function resetGiftRevealState() {
+      gameState.giftReveal.timer = 0;
+      gameState.giftReveal.confettiBurst = false;
+    }
+
     function resetRunState() {
       gameState.objects = [];
       gameState.particles = [];
@@ -628,6 +644,7 @@
       gameState.snowballSpawnTimer = 0;
       gameState.animTime = 0;
       gameState.input.holding = false;
+      resetGiftRevealState();
       resetHamsterPosition();
       updateAnimationFrames();
     }
@@ -639,7 +656,7 @@
       gameState.totalScore = 0;
       gameState.levelScore = 0;
       gameState.lives = 3;
-      choiceText = "";
+      gameState.chosenGift = "";
       gameState.screen = "playing";
       resetUiScreenState("none");
       resetRunState();
@@ -650,7 +667,7 @@
     function startNextLevel() {
       gameState.levelIndex += 1;
       gameState.levelScore = 0;
-      choiceText = "";
+      gameState.chosenGift = "";
       gameState.screen = "playing";
       resetUiScreenState("none");
       resetRunState();
@@ -668,7 +685,7 @@
     function jumpToLevel(levelIndex) {
       gameState.levelIndex = Math.max(0, Math.min(gameState.levels.length - 1, levelIndex));
       gameState.levelScore = 0;
-      choiceText = "";
+      gameState.chosenGift = "";
       gameState.screen = "playing";
       resetUiScreenState("none");
       resetRunState();
@@ -683,23 +700,32 @@
     function syncHud() {
     }
 
+    function showGiftReveal() {
+      gameState.screen = "giftReveal";
+      gameState.chosenGift = "";
+      gameState.input.holding = false;
+      resetUiScreenState("none");
+      resetGiftRevealState();
+    }
+
     function chooseFinalGift(gift) {
-      choiceText = gift === "🎵 Tocadiscos"
-        ? "Elegiste el tocadiscos.\nPronto van tus\n4 recuerdos aqui 🎶"
-        : "Elegiste la parka.\nPronto van tus\n4 recuerdos aqui 🧥";
+      gameState.chosenGift = gift;
+      gameState.screen = "finalScreen";
+      gameState.input.holding = false;
+      resetUiScreenState("final");
       spawnUIParticles("hearts", {
         count: 10,
         x: gameState.width * 0.5,
-        y: gameState.height * 0.28,
-        spreadX: 260,
-        spreadY: 80
+        y: gameState.height * 0.34,
+        spreadX: 300,
+        spreadY: 120
       });
       spawnUIParticles("confetti", {
         count: 26,
         x: gameState.width * 0.5,
-        y: gameState.height * 0.28,
-        spreadX: 320,
-        spreadY: 120
+        y: gameState.height * 0.34,
+        spreadX: 360,
+        spreadY: 160
       });
     }
 
@@ -707,7 +733,7 @@
       gameState.fastMode = false;
       gameState.levelIndex = 0;
       gameState.levels = cloneLevels(false);
-      choiceText = "";
+      gameState.chosenGift = "";
       gameState.screen = "start";
       gameState.objects = [];
       gameState.particles = [];
@@ -741,28 +767,14 @@
 
     function showRewardScreen() {
       const level = currentLevel();
-      gameState.screen = "reward";
       gameState.input.holding = false;
 
       if (level.isFinal) {
-        resetUiScreenState("final");
-        spawnUIParticles("hearts", {
-          count: 12,
-          x: gameState.width * 0.5,
-          y: gameState.height * 0.26,
-          spreadX: 300,
-          spreadY: 120
-        });
-        spawnUIParticles("confetti", {
-          count: 24,
-          x: gameState.width * 0.5,
-          y: gameState.height * 0.26,
-          spreadX: 320,
-          spreadY: 120
-        });
+        showGiftReveal();
         return;
       }
 
+      gameState.screen = "reward";
       resetUiScreenState("none");
       spawnUIParticles("confetti", {
         count: 26,
@@ -1287,6 +1299,39 @@
       ctx.fillRect(0, 0, gameState.width, gameState.height);
     }
 
+    function easeOutBack(t) {
+      if (t <= 0) {
+        return 0;
+      }
+      if (t >= 1) {
+        return 1;
+      }
+
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    }
+
+    function hashNoise(value) {
+      const raw = Math.sin(value * 127.1) * 43758.5453123;
+      return raw - Math.floor(raw);
+    }
+
+    function updateGiftReveal(dt) {
+      gameState.giftReveal.timer += dt;
+
+      if (!gameState.giftReveal.confettiBurst && gameState.giftReveal.timer >= 2) {
+        gameState.giftReveal.confettiBurst = true;
+        spawnUIParticles("confetti", {
+          count: 30,
+          x: gameState.width * 0.5,
+          y: gameState.height * 0.48,
+          spreadX: 420,
+          spreadY: 160
+        });
+      }
+    }
+
     function drawHud() {
       const level = currentLevel();
       const progress = Math.min(1, gameState.levelScore / level.pointsNeeded);
@@ -1455,65 +1500,185 @@
       });
     }
 
-    function drawPhotoPlaceholders(panelX, startY, panelW, forcedBoxSize) {
-      const boxSize = forcedBoxSize || Math.min(100, Math.floor((panelW - 54) / 4));
-      const gap = Math.floor((panelW - boxSize * 4) / 5);
-      let x = panelX + gap;
+    function drawGiftTornPaper(cx, y, width, progress) {
+      if (progress <= 0) {
+        return;
+      }
 
-      for (let index = 0; index < 4; index += 1) {
-        drawPanel(ctx, x, startY, boxSize, boxSize, "rgba(255, 245, 249, 0.88)");
-        pixelText(ctx, `F${index + 1}`, x + boxSize / 2, startY + boxSize / 2, 10, PURPLE_SOFT);
-        x += boxSize + gap;
+      ctx.save();
+      ctx.translate(cx, y);
+      ctx.scale(1, progress);
+
+      ctx.fillStyle = PINK_MID;
+      ctx.beginPath();
+      ctx.moveTo(-width * 0.43, 0);
+      ctx.lineTo(-width * 0.3, -22);
+      ctx.lineTo(-width * 0.18, -4);
+      ctx.lineTo(-width * 0.05, -28);
+      ctx.lineTo(width * 0.07, -8);
+      ctx.lineTo(width * 0.22, -26);
+      ctx.lineTo(width * 0.41, 0);
+      ctx.lineTo(width * 0.18, 26);
+      ctx.lineTo(0, 10);
+      ctx.lineTo(-width * 0.22, 24);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = YELLOW_SOFT;
+      ctx.beginPath();
+      ctx.moveTo(-width * 0.18, -6);
+      ctx.lineTo(-width * 0.05, -30);
+      ctx.lineTo(width * 0.11, -2);
+      ctx.lineTo(width * 0.24, -22);
+      ctx.lineTo(width * 0.31, 8);
+      ctx.lineTo(width * 0.08, 18);
+      ctx.lineTo(-width * 0.08, 12);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawGiftBox(id, gift, label, x, y, w, h, openProgress, clickable) {
+      const hovered = clickable && gameState.hoverButtonId === id;
+      const fill = hovered ? "#FFF0BB" : YELLOW_SOFT;
+      const centerX = x + w / 2;
+      const centerY = y + h / 2;
+      const revealAlpha = Math.min(1, Math.max(0, openProgress));
+      const bowSize = Math.max(18, Math.round(w / 8));
+      const labelSize = Math.max(9, Math.round(w / 18));
+
+      drawPanel(ctx, x, y, w, h, fill, PINK_DEEP, 4);
+      ctx.fillStyle = PINK_DARK;
+      ctx.fillRect(x + w / 2 - 2, y + 8, 4, h - 16);
+      ctx.fillRect(x + 8, y + h / 2 - 2, w - 16, 4);
+      pixelText(ctx, "🎀", centerX, centerY, bowSize, PINK_DEEP);
+      drawGiftTornPaper(centerX, y + 14, w * 0.9, openProgress);
+
+      if (revealAlpha > 0) {
+        ctx.save();
+        ctx.globalAlpha = revealAlpha;
+        pixelText(ctx, label, centerX, centerY + h * 0.16, labelSize, PINK_DEEP, {
+          lineHeight: Math.round(labelSize * 1.85)
+        });
+        ctx.restore();
+      }
+
+      if (clickable) {
+        registerUIButton(id, x, y, w, h, {
+          action: "gift",
+          gift
+        });
       }
     }
 
-    function drawFinalRewardScreen() {
-      drawTintOverlay(0.4);
+    function drawGiftRevealScreen() {
+      drawTintOverlay(0.5);
       drawUiParticles();
 
-      const panelW = Math.min(480, gameState.width - 28);
-      const panelH = Math.min(400, gameState.height - 36);
-      const panelX = (gameState.width - panelW) / 2;
-      const panelY = (gameState.height - panelH) / 2;
-      const centerX = panelX + panelW / 2;
-      const footerY = panelY + panelH - 50;
+      const timer = gameState.giftReveal.timer;
+      const scale = Math.max(0.56, Math.min(1, (gameState.width - 50) / 560, (gameState.height - 80) / 340));
+      const boxW = 220 * scale;
+      const boxH = 280 * scale;
+      const gap = 80 * scale;
+      const finalLeftX = gameState.width / 2 - gap / 2 - boxW;
+      const finalRightX = gameState.width / 2 + gap / 2;
+      const finalY = gameState.height / 2 - boxH / 2;
+      const slideProgress = easeOutBack((timer - 0.6) / 0.8);
+      const openProgress = Math.max(0, Math.min(1, (timer - 2) / 0.4));
+      const clickable = openProgress >= 1;
+      let leftX = -300 + (finalLeftX + 300) * slideProgress;
+      let rightX = gameState.width + 300 + (finalRightX - gameState.width - 300) * slideProgress;
+      let leftY = finalY;
+      let rightY = finalY;
 
-      drawPanel(ctx, panelX, panelY, panelW, panelH);
-      pixelText(ctx, "¡LO LOGRASTE! 🎀", centerX, panelY + 46, 13, PINK_DEEP);
-      pixelText(ctx, "Gracias por jugar\neste juego hecho\ncon mucho amor 💕", centerX, panelY + 108, 7, PURPLE_SOFT, {
-        lineHeight: 18
-      });
-
-      if (!choiceText) {
-        const buttonW = Math.min(180, (panelW - 52) / 2);
-        const leftX = centerX - buttonW - 10;
-        const rightX = centerX + 10;
-        drawButton("gift-record", "🎵 Tocadiscos", leftX, panelY + 176, buttonW, 56, {
-          action: "gift",
-          gift: "🎵 Tocadiscos",
-          textSize: 7
-        });
-        drawButton("gift-parka", "🧥 Parka", rightX, panelY + 176, buttonW, 56, {
-          action: "gift",
-          gift: "🧥 Parka",
-          textSize: 7
-        });
-      } else {
-        const photoBoxSize = Math.min(100, Math.floor((panelW - 54) / 4));
-        const photoY = footerY - photoBoxSize - 18;
-        pixelText(ctx, choiceText, centerX, Math.min(panelY + 190, photoY - 46), 7, PINK_DARK, {
-          lineHeight: 18
-        });
-        drawPhotoPlaceholders(panelX, photoY, panelW, photoBoxSize);
+      if (timer >= 1.4 && timer < 2) {
+        const sample = Math.floor((timer - 1.4) * 20);
+        leftX += (hashNoise(sample + 1.7) - 0.5) * 8;
+        leftY += (hashNoise(sample + 3.1) - 0.5) * 8;
+        rightX += (hashNoise(sample + 8.3) - 0.5) * 8;
+        rightY += (hashNoise(sample + 11.2) - 0.5) * 8;
       }
 
-      drawButton("final-retry", "REJUGAR", centerX - 136, footerY, 128, 36, {
-        action: "retry",
-        textSize: 6
+      drawGiftBox("gift-reveal-record", "tocadiscos", "🎵\nTocadiscos", leftX, leftY, boxW, boxH, openProgress, clickable);
+      drawGiftBox("gift-reveal-parka", "parka", "🧥\nParka", rightX, rightY, boxW, boxH, openProgress, clickable);
+
+      if (timer < 0.6) {
+        ctx.fillStyle = `rgba(255,255,255,${1 - timer / 0.6})`;
+        ctx.fillRect(0, 0, gameState.width, gameState.height);
+      }
+    }
+
+    function drawPhotoCard(image, x, y, w, h, angleDeg) {
+      ctx.save();
+      ctx.translate(x + w / 2, y + h / 2);
+      ctx.rotate((angleDeg * Math.PI) / 180);
+
+      if (image && image.naturalWidth) {
+        drawPanel(ctx, -w / 2, -h / 2, w, h, "rgba(255,245,249,0.96)");
+        roundedRectPath(ctx, -w / 2 + 10, -h / 2 + 10, w - 20, h - 20, 10);
+        ctx.clip();
+        ctx.drawImage(image, -w / 2 + 10, -h / 2 + 10, w - 20, h - 20);
+      } else {
+        drawPanel(ctx, -w / 2, -h / 2, w, h, "rgba(255,245,249,0.92)");
+        pixelText(ctx, "📷", 0, 0, Math.max(28, Math.round(w / 4.8)), PINK_DEEP);
+      }
+
+      ctx.restore();
+    }
+
+    function drawFinalScreen() {
+      ctx.fillStyle = "rgba(255,214,231,0.7)";
+      ctx.fillRect(0, 0, gameState.width, gameState.height);
+
+      const photoScale = Math.max(0.62, Math.min(1.08, gameState.width / 980, gameState.height / 760));
+      const photoW = 165 * photoScale;
+      const photoH = 210 * photoScale;
+      const leftXTop = Math.max(24, 60 * photoScale);
+      const leftXBottom = Math.max(38, 80 * photoScale);
+      const rightXTop = gameState.width - photoW - Math.max(24, 60 * photoScale);
+      const rightXBottom = gameState.width - photoW - Math.max(38, 80 * photoScale);
+      const topYLeft = Math.max(70, 120 * photoScale);
+      const bottomYLeft = Math.min(gameState.height - photoH - 100, 340 * photoScale);
+      const topYRight = Math.max(54, 100 * photoScale);
+      const bottomYRight = Math.min(gameState.height - photoH - 110, 330 * photoScale);
+      const centerX = gameState.width * 0.5;
+      const textWidth = Math.min(400, Math.max(240, gameState.width - photoW * 2 - 90));
+      const titleSize = gameState.width < 720 ? 14 : 17;
+      const giftSize = gameState.width < 720 ? 9 : 11;
+      const generalSize = gameState.width < 720 ? 8 : 10;
+      const titleLineHeight = gameState.width < 720 ? 32 : 38;
+      const giftLineHeight = gameState.width < 720 ? 22 : 26;
+      const generalLineHeight = gameState.width < 720 ? 20 : 24;
+      const titleY = Math.max(118, gameState.height * 0.19);
+      const giftY = Math.max(titleY + 132, gameState.height * 0.44);
+      const generalY = Math.min(gameState.height - 150, giftY + 150);
+      const buttonW = Math.min(248, gameState.width - 40);
+      const title = gameState.chosenGift === "tocadiscos"
+        ? "Tu regalo es\nun Tocadiscos 🎵"
+        : "Tu regalo es\nuna Parka 🧥";
+      const giftText = gameState.chosenGift === "tocadiscos"
+        ? GIFT_TEXT_TOCADISCOS
+        : GIFT_TEXT_PARKA;
+
+      drawPhotoCard(photos[0], leftXTop, topYLeft, photoW, photoH, -8);
+      drawPhotoCard(photos[1], leftXBottom, bottomYLeft, photoW, photoH, 5);
+      drawPhotoCard(photos[2], rightXTop, topYRight, photoW, photoH, 6);
+      drawPhotoCard(photos[3], rightXBottom, bottomYRight, photoW, photoH, -9);
+      drawUiParticles();
+
+      pixelText(ctx, title, centerX, titleY, titleSize, PINK_DEEP, {
+        lineHeight: titleLineHeight
       });
-      drawButton("final-menu", "MENU", centerX + 8, footerY, 104, 36, {
+      pixelText(ctx, wrapPixelText(giftText, textWidth, giftSize), centerX, giftY, giftSize, PURPLE_SOFT, {
+        lineHeight: giftLineHeight
+      });
+      pixelText(ctx, wrapPixelText(GIFT_TEXT_GENERAL, textWidth, generalSize), centerX, generalY, generalSize, PINK_DARK, {
+        lineHeight: generalLineHeight
+      });
+      drawButton("final-play-again", "↩ Jugar de nuevo", centerX - buttonW / 2, gameState.height - 78, buttonW, 44, {
         action: "menu",
-        textSize: 6
+        textSize: 7
       });
     }
 
@@ -1537,11 +1702,19 @@
 
       if (gameState.screen === "reward") {
         drawBackground(gameState.worldOffset, gameState.levelIndex);
-        if (currentLevel().isFinal) {
-          drawFinalRewardScreen();
-        } else {
-          drawRewardScreenPanel();
-        }
+        drawRewardScreenPanel();
+        return;
+      }
+
+      if (gameState.screen === "giftReveal") {
+        drawBackground(gameState.worldOffset, gameState.levelIndex);
+        drawGiftRevealScreen();
+        return;
+      }
+
+      if (gameState.screen === "finalScreen") {
+        drawBackground(gameState.worldOffset, gameState.levelIndex);
+        drawFinalScreen();
         return;
       }
 
@@ -1568,6 +1741,9 @@
         if (gameState.screen !== "paused") {
           gameState.animTime += dt;
           updateAnimationFrames();
+        }
+        if (gameState.screen === "giftReveal") {
+          updateGiftReveal(dt);
         }
         updateUiParticles(dt);
       }
