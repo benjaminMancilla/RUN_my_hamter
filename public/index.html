@@ -131,13 +131,142 @@
     const PINK_DARK = "#FF80B5";
     const PINK_DEEP = "#E0559A";
     const CREAM = "#FFF5F9";
-    const PURPLE_SOFT = "#D4A8E0";
+    const PURPLE_SOFT = "#623774";
     const YELLOW_SOFT = "#FFE8A3";
     const SHADOW = "rgba(180, 60, 120, 0.25)";
     const UI_CONFETTI_COLORS = [PINK_LIGHT, PINK_MID, PINK_DARK, PURPLE_SOFT, YELLOW_SOFT, CREAM];
     const GIFT_TEXT_TOCADISCOS = "Texto pendiente para el tocadiscos. Aqui va el mensaje final que quieras dejar para este regalo.";
     const GIFT_TEXT_PARKA = "Texto pendiente para la parka. Aqui va el mensaje final que quieras dejar para este regalo.";
     const GIFT_TEXT_GENERAL = "Gracias por jugar y llegar hasta aqui. Este espacio queda listo para completar el cierre con tus fotos y tu mensaje final.";
+    const AudioManager = {
+      tracks: {},
+      current: null,
+      muted: false,
+      volume: 0.7,
+      fadeInterval: null,
+      clearFade() {
+        if (this.fadeInterval) {
+          clearInterval(this.fadeInterval);
+          this.fadeInterval = null;
+        }
+      },
+      fadeVolume(key, targetVolume, options = {}) {
+        const track = this.tracks[key];
+        const onComplete = options.onComplete || null;
+        const pauseOnEnd = options.pauseOnEnd ?? false;
+        if (!track) {
+          if (onComplete) {
+            onComplete();
+          }
+          return;
+        }
+
+        this.clearFade();
+        const steps = Math.max(1, Math.round(800 / 50));
+        const startVolume = track.volume;
+        const delta = (targetVolume - startVolume) / steps;
+        let step = 0;
+
+        this.fadeInterval = setInterval(() => {
+          step += 1;
+          const nextVolume = step >= steps ? targetVolume : startVolume + delta * step;
+          track.volume = Math.max(0, Math.min(1, nextVolume));
+
+          if (step >= steps) {
+            this.clearFade();
+            if (pauseOnEnd) {
+              track.pause();
+            }
+            if (onComplete) {
+              onComplete();
+            }
+          }
+        }, 50);
+      },
+      fadeOut(key, cb) {
+        const track = this.tracks[key];
+        if (!track) {
+          if (cb) {
+            cb();
+          }
+          return;
+        }
+
+        if (track.paused || track.volume <= 0) {
+          track.volume = 0;
+          track.pause();
+          if (cb) {
+            cb();
+          }
+          return;
+        }
+
+        this.fadeVolume(key, 0, {
+          pauseOnEnd: true,
+          onComplete: cb
+        });
+      },
+      fadeIn(key) {
+        const track = this.tracks[key];
+        if (!track) {
+          return;
+        }
+
+        this.clearFade();
+        track.volume = 0;
+        track.currentTime = 0;
+        const playPromise = track.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {});
+        }
+
+        this.fadeVolume(key, this.muted ? 0 : this.volume);
+      },
+      play(key) {
+        const track = this.tracks[key];
+        if (!track) {
+          return;
+        }
+
+        if (this.current === key) {
+          if (track.paused) {
+            this.fadeIn(key);
+          } else if (!this.muted && track.volume < this.volume) {
+            this.fadeVolume(key, this.volume);
+          }
+          return;
+        }
+
+        const previous = this.current;
+        this.current = key;
+
+        if (!previous) {
+          this.fadeIn(key);
+          return;
+        }
+
+        this.fadeOut(previous, () => {
+          this.fadeIn(key);
+        });
+      },
+      toggleMute() {
+        this.muted = !this.muted;
+
+        if (this.muted) {
+          Object.keys(this.tracks).forEach((key) => {
+            const track = this.tracks[key];
+            if (!track.paused) {
+              this.fadeVolume(key, 0);
+            }
+          });
+          return;
+        }
+
+        if (this.current && this.tracks[this.current] && !this.tracks[this.current].paused) {
+          this.fadeVolume(this.current, this.volume);
+        }
+      }
+    };
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -160,6 +289,14 @@
     };
     const bgLayers = BACKGROUND_LAYER_COUNTS.map((count) => Array.from({ length: count }, () => new Image()));
     const photos = Array.from({ length: 4 }, () => new Image());
+
+    ["music_intro", "music_level2", "music_level3", "music_final", "music_gameover"].forEach((key) => {
+      const track = new Audio(`audio/${key}.mp3`);
+      track.loop = key !== "music_gameover";
+      track.volume = 0;
+      track.preload = "auto";
+      AudioManager.tracks[key] = track;
+    });
 
     let totalAssets = 0;
     let loadedAssets = 0;
@@ -606,6 +743,16 @@
       return gameState.levels[gameState.levelIndex] || gameState.levels[0] || LEVELS[0];
     }
 
+    function musicKeyForLevel(levelIndex) {
+      if (levelIndex === 1) {
+        return "music_level2";
+      }
+      if (levelIndex === 2) {
+        return "music_level3";
+      }
+      return "music_intro";
+    }
+
     function randomChoice(items) {
       return items[Math.floor(Math.random() * items.length)];
     }
@@ -662,6 +809,7 @@
       resetRunState();
       hideOverlay();
       syncHud();
+      AudioManager.play(musicKeyForLevel(gameState.levelIndex));
     }
 
     function startNextLevel() {
@@ -673,6 +821,7 @@
       resetRunState();
       hideOverlay();
       syncHud();
+      AudioManager.play(musicKeyForLevel(gameState.levelIndex));
     }
 
     function resumeGame() {
@@ -691,6 +840,7 @@
       resetRunState();
       hideOverlay();
       syncHud();
+      AudioManager.play(musicKeyForLevel(gameState.levelIndex));
     }
 
     function retryGame() {
@@ -706,6 +856,7 @@
       gameState.input.holding = false;
       resetUiScreenState("none");
       resetGiftRevealState();
+      AudioManager.play("music_final");
     }
 
     function chooseFinalGift(gift) {
@@ -713,6 +864,7 @@
       gameState.screen = "finalScreen";
       gameState.input.holding = false;
       resetUiScreenState("final");
+      AudioManager.play("music_final");
       spawnUIParticles("hearts", {
         count: 10,
         x: gameState.width * 0.5,
@@ -743,6 +895,7 @@
       resetHamsterPosition();
       updateAnimationFrames();
       resetUiScreenState("hearts");
+      AudioManager.play("music_intro");
       spawnUIParticles("hearts", {
         count: 10,
         x: gameState.width * 0.5,
@@ -756,6 +909,7 @@
       gameState.screen = "gameover";
       gameState.input.holding = false;
       resetUiScreenState("stars");
+      AudioManager.play("music_gameover");
       spawnUIParticles("stars", {
         count: 12,
         x: gameState.width * 0.5,
@@ -820,6 +974,8 @@
         jumpToLevel(gameState.levelIndex);
       } else if (button.action === "menu") {
         showStartScreen();
+      } else if (button.action === "mute") {
+        AudioManager.toggleMute();
       } else if (button.action === "gift") {
         chooseFinalGift(button.gift);
       }
@@ -1357,6 +1513,23 @@
       );
     }
 
+    function shouldShowMuteButton() {
+      return gameState.screen !== "loading"
+        && gameState.screen !== "gameover"
+        && gameState.screen !== "finalScreen";
+    }
+
+    function drawMuteButton() {
+      const x = gameState.width - 44;
+      const y = 8;
+      const hovered = gameState.hoverButtonId === "mute-toggle";
+      drawPanel(ctx, x, y, 32, 32, hovered ? PINK_LIGHT : CREAM);
+      pixelText(ctx, AudioManager.muted ? "🔇" : "🔊", x + 16, y + 16, 14, PINK_DEEP);
+      registerUIButton("mute-toggle", x, y, 32, 32, {
+        action: "mute"
+      });
+    }
+
     function drawStartScreen() {
       drawVignetteOverlay();
       drawUiParticles();
@@ -1673,7 +1846,7 @@
       pixelText(ctx, wrapPixelText(giftText, textWidth, giftSize), centerX, giftY, giftSize, PURPLE_SOFT, {
         lineHeight: giftLineHeight
       });
-      pixelText(ctx, wrapPixelText(GIFT_TEXT_GENERAL, textWidth, generalSize), centerX, generalY, generalSize, PINK_DARK, {
+      pixelText(ctx, wrapPixelText(GIFT_TEXT_GENERAL, textWidth, generalSize), centerX, generalY, generalSize, PINK_DEEP      , {
         lineHeight: generalLineHeight
       });
       drawButton("final-play-again", "↩ Jugar de nuevo", centerX - buttonW / 2, gameState.height - 78, buttonW, 44, {
@@ -1697,18 +1870,27 @@
       if (gameState.screen === "start") {
         drawBackground(0, 0);
         drawStartScreen();
+        if (shouldShowMuteButton()) {
+          drawMuteButton();
+        }
         return;
       }
 
       if (gameState.screen === "reward") {
         drawBackground(gameState.worldOffset, gameState.levelIndex);
         drawRewardScreenPanel();
+        if (shouldShowMuteButton()) {
+          drawMuteButton();
+        }
         return;
       }
 
       if (gameState.screen === "giftReveal") {
         drawBackground(gameState.worldOffset, gameState.levelIndex);
         drawGiftRevealScreen();
+        if (shouldShowMuteButton()) {
+          drawMuteButton();
+        }
         return;
       }
 
@@ -1726,6 +1908,10 @@
         drawPauseScreen();
       } else if (gameState.screen === "gameover") {
         drawGameOverScreen();
+      }
+
+      if (shouldShowMuteButton()) {
+        drawMuteButton();
       }
     }
 
@@ -1791,11 +1977,6 @@
     }
 
     function updateHoveredButton(point) {
-      if (gameState.screen === "playing") {
-        gameState.hoverButtonId = "";
-        return;
-      }
-
       const button = buttonAtPoint(point.x, point.y);
       gameState.hoverButtonId = button ? button.id : "";
     }
@@ -1803,6 +1984,13 @@
     canvas.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       const point = canvasPointFromEvent(event);
+      const button = buttonAtPoint(point.x, point.y);
+
+      if (button) {
+        updateHoveredButton(point);
+        handleUiAction(button);
+        return;
+      }
 
       if (gameState.screen === "playing") {
         handlePress();
@@ -1810,14 +1998,9 @@
       }
 
       updateHoveredButton(point);
-      handleUiAction(buttonAtPoint(point.x, point.y));
     });
 
     canvas.addEventListener("pointermove", (event) => {
-      if (gameState.screen === "playing") {
-        return;
-      }
-
       updateHoveredButton(canvasPointFromEvent(event));
     });
 
