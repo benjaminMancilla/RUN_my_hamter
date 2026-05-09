@@ -135,9 +135,25 @@
     const YELLOW_SOFT = "#FFE8A3";
     const SHADOW = "rgba(180, 60, 120, 0.25)";
     const UI_CONFETTI_COLORS = [PINK_LIGHT, PINK_MID, PINK_DARK, PURPLE_SOFT, YELLOW_SOFT, CREAM];
+    const FINAL_DECORATION_FILES = {
+      sun: "decoration/sun.png",
+      star: "decoration/star.png",
+      heartsFloating: "decoration/hearts_floating.png",
+      heart: "decoration/heart.png",
+      flowerWhiteOrange: "decoration/flower_whiteOrange.png",
+      flowerPink: "decoration/flower_pink.png",
+      flowerBlue: "decoration/flower_blue.png",
+      candy: "decoration/candy.png",
+      candyPurple: "decoration/candy-purple.png",
+      bunnyWhite: "decoration/bunny_white.png",
+      bunny: "decoration/bunny.png",
+      bowPink: "decoration/bow_pink.png",
+      bowOrange: "decoration/bow_orange.png",
+      bowBlue: "decoration/bow_blue.png"
+    };
     const GIFT_TEXT_TOCADISCOS = "Yo se que hace tiempo lo quiere (queremos) miamor, asi que ya toca hacernos music geeks. Sin vinilo incluido si (a menos que sea el OST del persona 5).";
-    const GIFT_TEXT_PARKA = "Me quedo piola aca por siaca pero se lo util que le puede ser una buena parca, ademas de que sufre de tanto piito. Su buen pelaje hamter.";
-    const GIFT_TEXT_GENERAL = "Gracias por jugar mi amorcito, te deseo un feliz cumpleaños (cuarto de siglo uuuuu) y espero que este jueguito te haya gustado, lo hice con mucho amor para ti <3 (hasta las 5 am 7w7). Te amo mucho mi hamster, espero que podamos seguir compartiendo muchos momentos juntos. Con amor, en gran whiskol alias, SLDF_Rataflautas, alias susovo.";
+    const GIFT_TEXT_PARKA = "Me quedo piola aca por siaca pero se lo util que le puede ser una buena parkita, ademas de que sufre de tanto piito. Su buen pelaje hamter.";
+    const GIFT_TEXT_GENERAL = "Gracias por jugar mi amorcito, te deseo un feliz cumpleaños (cuarto de siglo uuuuu) y espero que este jueguito te haya gustado, lo hice con mucho amor para ti <3 (hasta las 5 am 7w7). Te amo mucho mi hamster, sigamos compartiendo muchos momentos juntos. Con amor, en gran whiskol alias, SLDF_Rataflautas, alias susovo.";
     const AudioManager = {
       tracks: {},
       current: null,
@@ -285,7 +301,10 @@
       star: new Image(),
       feather: new Image(),
       note: new Image(),
-      deco: DECO_SPRITE_FILES.map(() => new Image())
+      deco: DECO_SPRITE_FILES.map(() => new Image()),
+      finalDecor: Object.fromEntries(
+        Object.keys(FINAL_DECORATION_FILES).map((key) => [key, new Image()])
+      )
     };
     const bgLayers = BACKGROUND_LAYER_COUNTS.map((count) => Array.from({ length: count }, () => new Image()));
     const photos = Array.from({ length: 4 }, () => new Image());
@@ -704,6 +723,9 @@
     });
     photos.forEach((image, index) => {
       queueImage(image, `photos/${index + 1}.jpg`);
+    });
+    Object.entries(sprites.finalDecor).forEach(([key, image]) => {
+      queueImage(image, FINAL_DECORATION_FILES[key]);
     });
 
     const gameState = {
@@ -1845,6 +1867,63 @@
       ctx.restore();
     }
 
+    function drawFinalDecorationSprite(key, cx, cy, size, angle = 0, options = {}) {
+      const image = sprites.finalDecor[key];
+      if (!image || !image.naturalWidth) {
+        return;
+      }
+
+      const scale = size / Math.max(image.naturalWidth, image.naturalHeight);
+      const drawW = image.naturalWidth * scale;
+      const drawH = image.naturalHeight * scale;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      if (options.flipX) {
+        ctx.scale(-1, 1);
+      }
+      if (options.flipY) {
+        ctx.scale(1, -1);
+      }
+      ctx.globalAlpha = options.alpha ?? 0.98;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, -drawW / 2, -drawH / 2, drawW, drawH);
+      ctx.restore();
+    }
+
+    function drawFinalDecorations(layout) {
+      const scale = layout.photoScale;
+      const decorations = [
+        { key: "bowPink", x: layout.photo1.x - 18, y: layout.photo1.y - 12, size: 54 * scale, angle: -0.28 },
+        { key: "sun", x: layout.photo1.x + layout.photo1.w + 18, y: layout.photo1.y + layout.photo1.h - 6, size: 72 * scale, angle: 0.18 },
+        { key: "heart", x: layout.photo2.x + layout.photo2.w + 18, y: layout.photo2.y + 32, size: 48 * scale, angle: 0.24 },
+        { key: "flowerBlue", x: layout.photo2.x - 18, y: layout.photo2.y + layout.photo2.h - 10, size: 54 * scale, angle: -0.16 },
+        { key: "star", x: layout.photo3.x - 18, y: layout.photo3.y + 18, size: 50 * scale, angle: -0.14 },
+        { key: "candy", x: layout.photo3.x + layout.photo3.w + 16, y: layout.photo3.y + layout.photo3.h - 8, size: 50 * scale, angle: 0.2 },
+        { key: "flowerPink", x: layout.photo4.x + layout.photo4.w + 18, y: layout.photo4.y + 26, size: 54 * scale, angle: 0.12 },
+        { key: "bunnyWhite", x: layout.photo4.x - 24, y: layout.photo4.y + layout.photo4.h - 2, size: 64 * scale, angle: -0.1 },
+        { key: "heartsFloating", x: layout.centerX, y: Math.max(34, layout.titleTop - 34), size: 92 * scale, angle: 0 },
+        { key: "flowerWhiteOrange", x: layout.photo1.x + layout.photo1.w * 0.16, y: layout.photo2.y - 44, size: 48 * scale, angle: -0.08 },
+        { key: "bunny", x: layout.photo3.x + layout.photo3.w * 0.82, y: layout.photo4.y - 44, size: 60 * scale, angle: 0.08, flipX: true },
+        { key: "candyPurple", x: layout.photo2.x + layout.photo2.w + 24, y: layout.buttonY - 46, size: 48 * scale, angle: -0.12 },
+        { key: "bowBlue", x: layout.photo4.x - 24, y: layout.buttonY - 44, size: 46 * scale, angle: 0.2 },
+        { key: "bowOrange", x: 42, y: 42, size: 42 * scale, angle: -0.18 },
+        { key: "heart", x: layout.canvasWidth - 40, y: 38, size: 42 * scale, angle: 0.18 }
+      ];
+
+      decorations.forEach((decoration) => {
+        drawFinalDecorationSprite(
+          decoration.key,
+          decoration.x,
+          decoration.y,
+          decoration.size,
+          decoration.angle,
+          decoration
+        );
+      });
+    }
+
     function drawFinalScreen() {
       ctx.fillStyle = "rgba(255,214,231,0.7)";
       ctx.fillRect(0, 0, gameState.width, gameState.height);
@@ -1854,20 +1933,20 @@
       const photoH = 210 * photoScale;
       const photo1Ratio = 1280 / 960;
       const photo2Ratio = 591 / 1280;
-      const photo1W = 240 * photoScale;
+      const photo1W = 270 * photoScale;
       const photo1H = photo1W / photo1Ratio;
-      const photo2H = 312 * photoScale;
+      const photo2H = 338 * photoScale;
       const photo2W = photo2H * photo2Ratio;
-      const photo4W = photoW * 1.15;
-      const photo4H = photoH * 1.15;
-      const leftXTop = Math.max(16, 34 * photoScale);
-      const leftXBottom = Math.max(28, 54 * photoScale);
+      const photo4W = photoW * 1.24;
+      const photo4H = photoH * 1.24;
+      const leftXTop = Math.max(8, 18 * photoScale);
+      const leftXBottom = Math.max(16, 38 * photoScale);
       const rightXTop = gameState.width - photoW - Math.max(26, 52 * photoScale);
-      const rightXBottom = gameState.width - photo4W - Math.max(18, 34 * photoScale);
-      const topYLeft = Math.max(66, 106 * photoScale);
-      const bottomYLeft = Math.min(gameState.height - photo2H - 56, 388 * photoScale);
+      const rightXBottom = gameState.width - photo4W - Math.max(8, 18 * photoScale);
+      const topYLeft = Math.max(54, 88 * photoScale);
+      const bottomYLeft = Math.min(gameState.height - photo2H - 26, 400 * photoScale);
       const topYRight = Math.max(54, 100 * photoScale);
-      const bottomYRight = Math.min(gameState.height - photo4H - 82, 348 * photoScale);
+      const bottomYRight = Math.min(gameState.height - photo4H - 58, 360 * photoScale);
       const leftClusterRight = Math.max(leftXTop + photo1W, leftXBottom + photo2W);
       const rightClusterLeft = Math.min(rightXTop, rightXBottom);
       const centerX = (leftClusterRight + rightClusterLeft) / 2;
@@ -1910,10 +1989,27 @@
       );
       const generalCenterY = generalTop + fittedGeneralText.height / 2;
 
-      drawPhotoCard(photos[0], leftXTop, topYLeft, photo1W, photo1H, -8);
-      drawPhotoCard(photos[1], leftXBottom, bottomYLeft, photo2W, photo2H, 5);
-      drawPhotoCard(photos[2], rightXTop, topYRight, photoW, photoH, 6);
-      drawPhotoCard(photos[3], rightXBottom, bottomYRight, photo4W, photo4H, -9);
+      const photo1 = { x: leftXTop, y: topYLeft, w: photo1W, h: photo1H };
+      const photo2 = { x: leftXBottom, y: bottomYLeft, w: photo2W, h: photo2H };
+      const photo3 = { x: rightXTop, y: topYRight, w: photoW, h: photoH };
+      const photo4 = { x: rightXBottom, y: bottomYRight, w: photo4W, h: photo4H };
+      const buttonY = gameState.height - 78;
+
+      drawPhotoCard(photos[0], photo1.x, photo1.y, photo1.w, photo1.h, -8);
+      drawPhotoCard(photos[1], photo2.x, photo2.y, photo2.w, photo2.h, 5);
+      drawPhotoCard(photos[2], photo3.x, photo3.y, photo3.w, photo3.h, 6);
+      drawPhotoCard(photos[3], photo4.x, photo4.y, photo4.w, photo4.h, -9);
+      drawFinalDecorations({
+        photoScale,
+        photo1,
+        photo2,
+        photo3,
+        photo4,
+        centerX,
+        titleTop,
+        buttonY,
+        canvasWidth: gameState.width
+      });
       drawUiParticles();
 
       pixelText(ctx, title, centerX, titleY, titleSize, PINK_DEEP, {
@@ -1925,7 +2021,7 @@
       pixelText(ctx, fittedGeneralText.text, centerX, generalCenterY, fittedGeneralText.size, PINK_DEEP, {
         lineHeight: fittedGeneralText.lineHeight
       });
-      drawButton("final-play-again", "↩ Jugar de nuevo", centerX - buttonW / 2, gameState.height - 78, buttonW, 44, {
+      drawButton("final-play-again", "↩ Jugar de nuevo", centerX - buttonW / 2, buttonY, buttonW, 44, {
         action: "menu",
         textSize: 7
       });
