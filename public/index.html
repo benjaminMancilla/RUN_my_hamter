@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RUN my hamter</title>
+  <style>
+    :root {
+      --panel: rgba(15, 20, 32, 0.78);
+      --panel-border: rgba(255, 255, 255, 0.16);
+      --cream: #fffaf0;
+      --accent: #ffd166;
+      --accent-2: #ff7b54;
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      overflow: hidden;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(255, 209, 102, 0.4), transparent 34%),
+        linear-gradient(180deg, #15213b 0%, #090d16 100%);
+      color: var(--cream);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .shell {
+      position: relative;
+      width: min(1180px, 96vw);
+      height: min(760px, 92vh);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow:
+        0 22px 70px rgba(0, 0, 0, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      background: #0f1726;
+      touch-action: none;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .hud {
+      position: absolute;
+      inset: 0 0 auto 0;
+      padding: 16px;
+      z-index: 3;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .hud.hidden {
+      opacity: 0;
+    }
+
+    .hud-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(12px);
+    }
+
+    .progress-track {
+      width: min(420px, 100%);
+      height: 16px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ffe066 0%, #ff8a5b 55%, #ff477e 100%);
+      transition: width 160ms linear;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(7, 11, 19, 0.36), rgba(7, 11, 19, 0.78));
+    }
+
+    .overlay.hidden {
+      display: none;
+    }
+
+    .card {
+      width: min(560px, 100%);
+      padding: 28px;
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)),
+        rgba(10, 16, 28, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 22px 80px rgba(0, 0, 0, 0.45);
+      text-align: center;
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      background: rgba(255, 209, 102, 0.18);
+      border: 1px solid rgba(255, 209, 102, 0.28);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1;
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: rgba(255, 250, 240, 0.9);
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      min-width: 150px;
+      font: inherit;
+      font-weight: 700;
+      color: #101522;
+      background: linear-gradient(180deg, #ffe082 0%, #ffb347 100%);
+      box-shadow: 0 12px 24px rgba(255, 179, 71, 0.28);
+      cursor: pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+    }
+
+    button:hover,
+    button:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(255, 179, 71, 0.32);
+      filter: brightness(1.03);
+      outline: none;
+    }
+
+    button.alt {
+      background: linear-gradient(180deg, #8fd3ff 0%, #5bb8ff 100%);
+      box-shadow: 0 12px 24px rgba(91, 184, 255, 0.24);
+    }
+
+    button.ghost {
+      color: var(--cream);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: none;
+    }
+
+    .touch-note {
+      margin-top: 8px;
+      font-size: 0.92rem;
+      opacity: 0.8;
+    }
+
+    .gift-choice {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .gift-choice button {
+      min-width: 0;
+    }
+
+    .selected-gift {
+      margin-top: 12px;
+      font-weight: 700;
+      color: #ffe082;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      body {
+        padding: 0;
+      }
+
+      .hud {
+        padding: 12px;
+      }
+
+      .hud-top {
+        align-items: stretch;
+      }
+
+      .progress-track {
+        width: 100%;
+      }
+
+      .card {
+        padding: 22px 18px;
+      }
+
+      .gift-choice {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell" id="shell">
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="hud hidden" id="hud">
+      <div class="hud-top">
+        <div class="pill" id="levelLabel"></div>
+        <div class="pill" id="scoreLabel"></div>
+        <div class="pill" id="livesLabel"></div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+  </div>
+
+  <script>
+    const LEVELS = [
+      {
+        theme: "🌻 Girasoles",
+        collectSprites: ["sunflower", "seed"],
+        obstacleType: "vaina",
+        pointsNeeded: 20,
+        reward: "¡Conseguiste flores! 🌸"
+      },
+      {
+        theme: "🍬 Golosinas",
+        collectSprites: ["cinamon", "dorito"],
+        obstacleType: "star",
+        pointsNeeded: 25,
+        reward: "¡Conseguiste golosinas! 🍬"
+      },
+      {
+        theme: "🌨️ Piito",
+        collectSprites: ["feather", "note"],
+        obstacleType: "snowball",
+        pointsNeeded: 30,
+        reward: "¡Elige tu regalo! 🎁",
+        isFinal: true
+      }
+    ];
+
+    const DECO_SPRITE_FILES = [
+      "deco_cosmo.png",
+      "deco_daffodil.png",
+      "deco_daisy.png",
+      "deco_lavender.png",
+      "deco_lilyvalley.png",
+      "deco_lily.png",
+      "deco_orchid.png",
+      "deco_pansy.png",
+      "deco_poppy.png",
+      "deco_rose.png",
+      "deco_sunflower.png",
+      "deco_tulip.png"
+    ];
+
+    const BACKGROUND_LAYER_COUNTS = [7, 9, 9];
+    const ANIMATED_SPRITE_FRAMES = {
+      hamster: 10,
+      star: 14,
+      feather: 8,
+      note: 4
+    };
+    const STATIC_SPRITE_SIZES = {
+      sunflower: 48,
+      seed: 48,
+      cinamon: 48,
+      dorito: 48,
+      chili: 48,
+      cola: 48,
+      snowball: 40
+    };
+    const VAINA_ASPECT_RATIO = 388 / 1056;
+    const FRAME_SIZE = 32;
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const shell = document.getElementById("shell");
+    const overlay = document.getElementById("overlay");
+    const hud = document.getElementById("hud");
+    const levelLabel = document.getElementById("levelLabel");
+    const scoreLabel = document.getElementById("scoreLabel");
+    const livesLabel = document.getElementById("livesLabel");
+    const progressFill = document.getElementById("progressFill");
+
+    const sprites = {
+      sunflower: new Image(),
+      seed: new Image(),
+      cinamon: new Image(),
+      dorito: new Image(),
+      chili: new Image(),
+      cola: new Image(),
+      snowball: new Image(),
+      vaina: new Image(),
+      hamster: new Image(),
+      star: new Image(),
+      feather: new Image(),
+      note: new Image(),
+      deco: DECO_SPRITE_FILES.map(() => new Image())
+    };
+    const bgLayers = BACKGROUND_LAYER_COUNTS.map((count) => Array.from({ length: count }, () => new Image()));
+
+    let totalAssets = 0;
+    let loadedAssets = 0;
+    let booted = false;
+
+    function handleAssetReady() {
+      loadedAssets += 1;
+      if (!booted && loadedAssets >= totalAssets) {
+        bootGame();
+      }
+    }
+
+    function queueImage(image, src) {
+      totalAssets += 1;
+      image.onload = handleAssetReady;
+      image.onerror = () => {
+        console.warn(`Missing asset: ${src}`);
+        handleAssetReady();
+      };
+      image.src = src;
+    }
+
+    queueImage(sprites.sunflower, "sunflower.png");
+    queueImage(sprites.seed, "seed.png");
+    queueImage(sprites.cinamon, "cinamon.png");
+    queueImage(sprites.dorito, "dorito.png");
+    queueImage(sprites.chili, "chili.png");
+    queueImage(sprites.cola, "cola.png");
+    queueImage(sprites.snowball, "snowball.png");
+    queueImage(sprites.vaina, "vaina.png");
+    queueImage(sprites.hamster, "hamster.png");
+    queueImage(sprites.star, "star.png");
+    queueImage(sprites.feather, "feather.png");
+    queueImage(sprites.note, "note.png");
+    sprites.deco.forEach((image, index) => {
+      queueImage(image, DECO_SPRITE_FILES[index]);
+    });
+    bgLayers.forEach((layers, levelIndex) => {
+      layers.forEach((image, layerIndex) => {
+        queueImage(image, `bg/level${levelIndex + 1}/${layerIndex + 1}.png`);
+      });
+    });
+
+    const gameState = {
+      screen: "loading",
+      fastMode: false,
+      levelIndex: 0,
+      totalScore: 0,
+      levelScore: 0,
+      lives: 3,
+      lastTime: performance.now(),
+      animTime: 0,
+      width: 0,
+      height: 0,
+      dpr: Math.max(1, Math.min(window.devicePixelRatio || 1, 2)),
+      worldOffset: 0,
+      spawnCooldown: 0,
+      starSpawnTimer: 0,
+      snowballSpawnTimer: 0,
+      selectedGift: "",
+      input: {
+        holding: false
+      },
+      hamster: {
+        x: 0,
+        y: 0,
+        size: 64,
+        radius: 28,
+        vy: 0,
+        invincibleTimer: 0,
+        hitFlash: 0
+      },
+      objects: [],
+      particles: [],
+      levels: cloneLevels(false),
+      frames: {
+        hamster: 0,
+        star: 0,
+        feather: 0,
+        note: 0
+      }
+    };
+
+    function cloneLevels(fastMode) {
+      return LEVELS.map((level) => ({
+        ...level,
+        pointsNeeded: fastMode ? Math.max(1, Math.ceil(level.pointsNeeded / 2)) : level.pointsNeeded
+      }));
+    }
+
+    function currentLevel() {
+      return gameState.levels[gameState.levelIndex] || gameState.levels[0] || LEVELS[0];
+    }
+
+    function randomChoice(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function levelSpeed() {
+      return 260 + gameState.levelIndex * 38;
+    }
+
+    function updateAnimationFrames() {
+      gameState.frames.hamster = Math.floor(gameState.animTime * 12) % 10;
+      gameState.frames.star = Math.floor(gameState.animTime * 10) % 14;
+      gameState.frames.feather = Math.floor(gameState.animTime * 8) % 8;
+      gameState.frames.note = Math.floor(gameState.animTime * 10) % 4;
+    }
+
+    function resetHamsterPosition() {
+      gameState.hamster.x = gameState.width * 0.28;
+      gameState.hamster.y = gameState.height * 0.5;
+      gameState.hamster.vy = 0;
+      gameState.hamster.invincibleTimer = 0;
+      gameState.hamster.hitFlash = 0;
+      gameState.hamster.radius = gameState.hamster.size * 0.42;
+    }
+
+    function resetRunState() {
+      gameState.objects = [];
+      gameState.particles = [];
+      gameState.worldOffset = 0;
+      gameState.spawnCooldown = 0;
+      gameState.starSpawnTimer = 0;
+      gameState.snowballSpawnTimer = 0;
+      gameState.animTime = 0;
+      gameState.input.holding = false;
+      resetHamsterPosition();
+      updateAnimationFrames();
+    }
+
+    function startGame(fastMode) {
+      gameState.fastMode = fastMode;
+      gameState.levels = cloneLevels(fastMode);
+      gameState.levelIndex = 0;
+      gameState.totalScore = 0;
+      gameState.levelScore = 0;
+      gameState.lives = 3;
+      gameState.selectedGift = "";
+      gameState.screen = "playing";
+      resetRunState();
+      hideOverlay();
+      syncHud();
+    }
+
+    function startNextLevel() {
+      gameState.levelIndex += 1;
+      gameState.levelScore = 0;
+      gameState.screen = "playing";
+      resetRunState();
+      hideOverlay();
+      syncHud();
+    }
+
+    function resumeGame() {
+      gameState.screen = "playing";
+      hideOverlay();
+      syncHud();
+    }
+
+    function jumpToLevel(levelIndex) {
+      gameState.levelIndex = Math.max(0, Math.min(gameState.levels.length - 1, levelIndex));
+      gameState.levelScore = 0;
+      gameState.screen = "playing";
+      resetRunState();
+      hideOverlay();
+      syncHud();
+    }
+
+    function retryGame() {
+      startGame(gameState.fastMode);
+    }
+
+    function syncHud() {
+      const level = currentLevel();
+      const progress = Math.min(1, gameState.levelScore / level.pointsNeeded);
+      hud.classList.toggle("hidden", gameState.screen !== "playing");
+      levelLabel.textContent = `Nivel ${gameState.levelIndex + 1}/${gameState.levels.length} · ${level.theme}`;
+      scoreLabel.textContent = `Puntos ${gameState.levelScore}/${level.pointsNeeded} · Total ${gameState.totalScore}`;
+      livesLabel.textContent = `Vidas ${"❤️".repeat(gameState.lives)}${"🩶".repeat(3 - gameState.lives)}`;
+      progressFill.style.width = `${progress * 100}%`;
+    }
+
+    function showStartScreen() {
+      gameState.fastMode = false;
+      gameState.levelIndex = 0;
+      gameState.levels = cloneLevels(false);
+      gameState.selectedGift = "";
+      gameState.screen = "start";
+      gameState.objects = [];
+      gameState.particles = [];
+      gameState.worldOffset = 0;
+      gameState.animTime = 0;
+      gameState.input.holding = false;
+      resetHamsterPosition();
+      hud.classList.add("hidden");
+      overlay.classList.remove("hidden");
+      overlay.innerHTML = `
+        <div class="card">
+          <div class="eyebrow">RUN my hamter</div>
+          <h1>🐹 A volar</h1>
+          <p>
+            Mantén <strong>Espacio</strong> o toca la pantalla para subir.
+            Suelta para caer con gravedad. Recolecta sprites, evita obstáculos y completa 3 niveles.
+          </p>
+          <div class="button-row">
+            <button data-action="start">Jugar</button>
+            <button class="alt" data-action="fast">Modo Rápido</button>
+          </div>
+          <p class="touch-note">Modo Rápido reduce a la mitad los puntos necesarios en todos los niveles.</p>
+        </div>
+      `;
+    }
+
+    function showGameOverScreen() {
+      gameState.screen = "gameover";
+      gameState.input.holding = false;
+      hud.classList.add("hidden");
+      overlay.classList.remove("hidden");
+      overlay.innerHTML = `
+        <div class="card">
+          <div class="eyebrow">Game Over</div>
+          <h1>💥 Hamter no pudo más</h1>
+          <p>Sumaste ${gameState.totalScore} puntos y llegaste al nivel ${gameState.levelIndex + 1}.</p>
+          <div class="button-row">
+            <button data-action="retry">Reintentar</button>
+            <button class="ghost" data-action="menu">Menú</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function showRewardScreen() {
+      const level = currentLevel();
+      gameState.screen = "reward";
+      gameState.input.holding = false;
+      hud.classList.add("hidden");
+      overlay.classList.remove("hidden");
+
+      if (level.isFinal) {
+        overlay.innerHTML = `
+          <div class="card">
+            <div class="eyebrow">Nivel Final Superado</div>
+            <h1>${level.theme}</h1>
+            <p>${level.reward}</p>
+            <div class="gift-choice">
+              <button data-gift="🎵 Tocadiscos">🎵 Tocadiscos</button>
+              <button class="alt" data-gift="🧥 Parka">🧥 Parka</button>
+            </div>
+            ${gameState.selectedGift ? `<div class="selected-gift">Elegiste: ${gameState.selectedGift}</div>` : ""}
+            <div class="button-row">
+              <button data-action="retry">Jugar otra vez</button>
+              <button class="ghost" data-action="menu">Menú</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      overlay.innerHTML = `
+        <div class="card">
+          <div class="eyebrow">Recompensa</div>
+          <h1>${level.theme}</h1>
+          <p>${level.reward}</p>
+          <div class="button-row">
+            <button data-action="continue">Continuar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function showPauseScreen() {
+      gameState.screen = "paused";
+      gameState.input.holding = false;
+      hud.classList.add("hidden");
+      overlay.classList.remove("hidden");
+      overlay.innerHTML = `
+        <div class="card">
+          <div class="eyebrow">Pausa</div>
+          <h1>${currentLevel().theme}</h1>
+          <p>Elige qué hacer con la partida actual.</p>
+          <div class="button-row">
+            <button data-action="resume">Reanudar</button>
+            <button class="ghost" data-action="menu">Salir</button>
+          </div>
+          <div class="gift-choice">
+            <button data-action="level" data-level-index="0">Nivel 1</button>
+            <button class="alt" data-action="level" data-level-index="1">Nivel 2</button>
+            <button class="ghost" data-action="level" data-level-index="2">Nivel 3</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function hideOverlay() {
+      overlay.classList.add("hidden");
+    }
+
+    function drawStaticSprite(key, cx, cy, width, height = width) {
+      const image = sprites[key];
+      if (!image || !image.naturalWidth) {
+        return;
+      }
+
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, cx - width / 2, cy - height / 2, width, height);
+      ctx.restore();
+    }
+
+    function drawAnimatedSprite(key, frameIndex, cx, cy, size) {
+      const image = sprites[key];
+      const totalFrames = ANIMATED_SPRITE_FRAMES[key];
+      if (!image || !image.naturalWidth || !totalFrames) {
+        return;
+      }
+
+      const frame = frameIndex % totalFrames;
+      const srcX = (frame % 3) * FRAME_SIZE;
+      const srcY = Math.floor(frame / 3) * FRAME_SIZE;
+
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(image, srcX, srcY, FRAME_SIZE, FRAME_SIZE, cx - size / 2, cy - size / 2, size, size);
+      ctx.restore();
+    }
+
+    function spawnCollectible(level, minY, maxY) {
+      const isCandyLevel = level.obstacleType === "star";
+      const bad = isCandyLevel && Math.random() < 0.3;
+      const spriteKey = bad ? randomChoice(["chili", "cola"]) : randomChoice(level.collectSprites);
+      const y = minY + Math.random() * Math.max(10, maxY - minY);
+      const collectible = {
+        type: "collect",
+        spriteKey,
+        bad,
+        x: gameState.width + 60 + Math.random() * 50,
+        y,
+        baseY: y,
+        radius: 20,
+        size: 48,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 1.5 + Math.random() * 2,
+        drift: (Math.random() - 0.5) * 16,
+        rotation: (Math.random() - 0.5) * 0.18
+      };
+      gameState.objects.push(collectible);
+
+      if (Math.random() < 0.32) {
+        const extraY = Math.min(maxY, Math.max(minY, y + (Math.random() < 0.5 ? -55 : 55)));
+        gameState.objects.push({
+          ...collectible,
+          x: collectible.x + 52,
+          y: extraY,
+          baseY: extraY,
+          wobble: Math.random() * Math.PI * 2,
+          drift: (Math.random() - 0.5) * 16,
+          rotation: (Math.random() - 0.5) * 0.18
+        });
+      }
+    }
+
+    function spawnVainaObstacle(ceilingY, floorY) {
+      const edge = Math.random() < 0.5 ? "top" : "bottom";
+      const drawH = gameState.height * (0.25 + Math.random() * 0.08);
+      const drawW = drawH * VAINA_ASPECT_RATIO;
+      gameState.objects.push({
+        type: "obstacle",
+        spriteKey: "vaina",
+        fixed: true,
+        edge,
+        x: gameState.width + 70 + Math.random() * 42,
+        y: edge === "top" ? ceilingY + drawH / 2 : floorY - drawH / 2,
+        drawW,
+        drawH,
+        hitbox: {
+          w: drawW * 0.4,
+          h: drawH
+        }
+      });
+    }
+
+    function spawnStarObstacle(ceilingY, floorY) {
+      const spawnFromRight = Math.random() < 0.6;
+      gameState.objects.push({
+        type: "obstacle",
+        spriteKey: "star",
+        fixed: false,
+        x: spawnFromRight ? gameState.width + 64 + Math.random() * 28 : Math.random() * gameState.width,
+        y: spawnFromRight
+          ? ceilingY + Math.random() * Math.max(10, floorY - ceilingY)
+          : ceilingY,
+        vx: -(levelSpeed() * 0.8 + Math.random() * 60),
+        vy: 90 + Math.random() * 140,
+        radius: 20,
+        size: 48,
+        rotation: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 3.4
+      });
+    }
+
+    function spawnSnowballObstacle(ceilingY, floorY) {
+      gameState.objects.push({
+        type: "obstacle",
+        spriteKey: "snowball",
+        fixed: false,
+        x: gameState.width + 64 + Math.random() * 24,
+        y: ceilingY + 30 + Math.random() * Math.max(10, floorY - ceilingY - 60),
+        vx: -(240 + Math.random() * 220),
+        vy: 0,
+        radius: 20,
+        size: 40,
+        rotation: 0
+      });
+    }
+
+    function spawnObstacle(level, ceilingY, floorY) {
+      if (level.obstacleType === "vaina") {
+        spawnVainaObstacle(ceilingY, floorY);
+      } else if (level.obstacleType === "star") {
+        spawnStarObstacle(ceilingY, floorY);
+      } else if (level.obstacleType === "snowball") {
+        spawnSnowballObstacle(ceilingY, floorY);
+      }
+    }
+
+    function spawnObject() {
+      const level = currentLevel();
+      const ceilingY = 48;
+      const floorY = gameState.height - 50;
+      const minY = ceilingY + 30;
+      const maxY = floorY - 30;
+
+      if (level.obstacleType !== "vaina") {
+        spawnCollectible(level, minY, maxY);
+      } else if (Math.random() < 0.56) {
+        spawnCollectible(level, minY, maxY);
+      } else {
+        spawnObstacle(level, ceilingY, floorY);
+      }
+    }
+
+    function spawnCollectParticles(x, y) {
+      const palette = ["#ffe066", "#ffb347", "#7bdff2", "#b8f2e6", "#ffffff"];
+      for (let i = 0; i < 12; i += 1) {
+        gameState.particles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 180,
+          vy: (Math.random() - 1.1) * 180,
+          life: 0.55 + Math.random() * 0.35,
+          maxLife: 0.9,
+          size: 3 + Math.random() * 5,
+          color: palette[i % palette.length]
+        });
+      }
+    }
+
+    function spawnHitParticles(x, y) {
+      for (let i = 0; i < 12; i += 1) {
+        gameState.particles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 220,
+          vy: (Math.random() - 0.6) * 220,
+          life: 0.35 + Math.random() * 0.25,
+          maxLife: 0.65,
+          size: 4 + Math.random() * 4,
+          color: i % 2 === 0 ? "#ff6b6b" : "#ffffff"
+        });
+      }
+    }
+
+    function updateObjectMotion(obj, dt, speed) {
+      if (obj.type === "collect") {
+        obj.x -= speed * dt;
+        obj.wobble += obj.wobbleSpeed * dt;
+        obj.y = obj.baseY + Math.sin(obj.wobble) * 14 + obj.drift * Math.sin(obj.wobble * 0.6);
+        return;
+      }
+
+      if (obj.fixed) {
+        obj.x -= speed * dt;
+        return;
+      }
+
+      obj.x += obj.vx * dt;
+      obj.y += (obj.vy || 0) * dt;
+      obj.rotation += (obj.spin || 0) * dt;
+    }
+
+    function isObjectOffscreen(obj) {
+      if (obj.spriteKey === "vaina") {
+        return obj.x < -(obj.drawW || 40);
+      }
+
+      if (obj.type === "collect") {
+        return obj.x < -80;
+      }
+
+      if (obj.spriteKey === "star") {
+        return obj.x < -80 || obj.y > gameState.height + 80;
+      }
+
+      if (obj.spriteKey === "snowball") {
+        return obj.x < -80;
+      }
+
+      return obj.x < -80;
+    }
+
+    function collidesWithHamster(obj) {
+      const hamster = gameState.hamster;
+      const dx = hamster.x - obj.x;
+      const dy = hamster.y - obj.y;
+
+      if (obj.fixed) {
+        return Math.abs(dx) < (hamster.radius + obj.hitbox.w / 2)
+          && Math.abs(dy) < (hamster.radius + obj.hitbox.h / 2);
+      }
+
+      return Math.hypot(dx, dy) < hamster.radius + (obj.radius || 20) * 0.78;
+    }
+
+    function updatePlaying(dt) {
+      const hamster = gameState.hamster;
+      const level = currentLevel();
+      const speed = levelSpeed();
+      const upwardForce = -980;
+      const gravity = 1260;
+      const floorY = gameState.height - 50;
+      const ceilingY = 48;
+
+      gameState.worldOffset += speed * dt;
+      gameState.spawnCooldown -= dt;
+      gameState.starSpawnTimer -= dt;
+      gameState.snowballSpawnTimer -= dt;
+
+      if (gameState.spawnCooldown <= 0) {
+        spawnObject();
+        gameState.spawnCooldown = Math.max(0.24, 0.72 - gameState.levelIndex * 0.07 + Math.random() * 0.24);
+      }
+
+      if (level.obstacleType === "star" && gameState.starSpawnTimer <= 0) {
+        spawnStarObstacle(ceilingY, floorY);
+        gameState.starSpawnTimer = Math.max(0.15, 0.4 - gameState.levelIndex * 0.05);
+      }
+
+      if (level.obstacleType === "snowball" && gameState.snowballSpawnTimer <= 0) {
+        const count = Math.random() < 0.5 ? 1 : 2;
+        for (let i = 0; i < count; i += 1) {
+          spawnSnowballObstacle(ceilingY, floorY);
+        }
+        gameState.snowballSpawnTimer = 0.5;
+      }
+
+      hamster.vy += (gameState.input.holding ? upwardForce : gravity) * dt;
+      hamster.vy = Math.max(-460, Math.min(560, hamster.vy));
+      hamster.y += hamster.vy * dt;
+
+      if (hamster.y > floorY) {
+        hamster.y = floorY;
+        hamster.vy = Math.min(0, hamster.vy) * 0.4;
+      }
+
+      if (hamster.y < ceilingY) {
+        hamster.y = ceilingY;
+        hamster.vy = 0;
+      }
+
+      hamster.invincibleTimer = Math.max(0, hamster.invincibleTimer - dt);
+      hamster.hitFlash = Math.max(0, hamster.hitFlash - dt);
+
+      for (let i = gameState.objects.length - 1; i >= 0; i -= 1) {
+        const obj = gameState.objects[i];
+        updateObjectMotion(obj, dt, speed);
+
+        if (isObjectOffscreen(obj)) {
+          gameState.objects.splice(i, 1);
+          continue;
+        }
+
+        if (!collidesWithHamster(obj)) {
+          continue;
+        }
+
+        if (obj.type === "collect" && !obj.bad) {
+          gameState.objects.splice(i, 1);
+          gameState.totalScore += 1;
+          gameState.levelScore += 1;
+          spawnCollectParticles(obj.x, obj.y);
+          syncHud();
+
+          if (gameState.levelScore >= level.pointsNeeded) {
+            gameState.objects = [];
+            gameState.particles = [];
+            showRewardScreen();
+            return;
+          }
+
+          continue;
+        }
+
+        if (hamster.invincibleTimer > 0) {
+          continue;
+        }
+
+        if (!obj.fixed || obj.bad) {
+          gameState.objects.splice(i, 1);
+        }
+        gameState.lives -= 1;
+        hamster.invincibleTimer = 1.15;
+        hamster.hitFlash = 0.2;
+        hamster.vy = -240;
+        spawnHitParticles(obj.x, obj.y);
+        syncHud();
+
+        if (gameState.lives <= 0) {
+          showGameOverScreen();
+          return;
+        }
+      }
+
+      for (let i = gameState.particles.length - 1; i >= 0; i -= 1) {
+        const particle = gameState.particles[i];
+        particle.life -= dt;
+        particle.x += particle.vx * dt;
+        particle.y += particle.vy * dt;
+        particle.vy += 220 * dt;
+        if (particle.life <= 0) {
+          gameState.particles.splice(i, 1);
+        }
+      }
+    }
+
+    function drawBackground() {
+      ctx.fillStyle = "#08111d";
+      ctx.fillRect(0, 0, gameState.width, gameState.height);
+
+      const layers = bgLayers[gameState.levelIndex] || bgLayers[0];
+      const divisor = Math.max(1, layers.length - 1);
+
+      layers.forEach((image, index) => {
+        if (!image.naturalWidth) {
+          return;
+        }
+
+        const speed = 0.05 + (index / divisor) * 0.55;
+        const x = -((gameState.worldOffset * speed) % gameState.width);
+        ctx.drawImage(image, x, 0, gameState.width, gameState.height);
+        ctx.drawImage(image, x + gameState.width, 0, gameState.width, gameState.height);
+        if (x > 0) {
+          ctx.drawImage(image, x - gameState.width, 0, gameState.width, gameState.height);
+        }
+      });
+    }
+
+    function drawHamster() {
+      const hamster = gameState.hamster;
+      const blink = hamster.invincibleTimer > 0 && Math.floor(hamster.invincibleTimer * 18) % 2 === 0;
+
+      ctx.fillStyle = hamster.hitFlash > 0 ? "rgba(255, 90, 90, 0.32)" : "rgba(255, 209, 102, 0.22)";
+      ctx.beginPath();
+      ctx.arc(hamster.x, hamster.y, hamster.radius + 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(68, 42, 22, 0.78)";
+      ctx.fillRect(hamster.x - 24, hamster.y + hamster.size * 0.42, 50, 6);
+
+      if (blink) {
+        return;
+      }
+
+      drawAnimatedSprite("hamster", gameState.frames.hamster, hamster.x, hamster.y, hamster.size);
+    }
+
+    function drawVaina(obj) {
+      const anchorY = obj.edge === "top" ? 48 : gameState.height - 50;
+      ctx.save();
+      ctx.translate(obj.x, anchorY);
+      ctx.imageSmoothingEnabled = false;
+      if (obj.edge === "top") {
+        ctx.scale(1, -1);
+      }
+      if (sprites.vaina.naturalWidth) {
+        ctx.drawImage(
+          sprites.vaina,
+          -obj.drawW / 2,
+          -obj.drawH,
+          obj.drawW,
+          obj.drawH
+        );
+      }
+      ctx.restore();
+    }
+
+    function drawCollectible(obj) {
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.radius + 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(obj.x, obj.y);
+      ctx.rotate(Math.sin(obj.wobble) * obj.rotation);
+      if (obj.spriteKey === "feather") {
+        drawAnimatedSprite("feather", gameState.frames.feather, 0, 0, obj.size);
+      } else if (obj.spriteKey === "note") {
+        drawAnimatedSprite("note", gameState.frames.note, 0, 0, obj.size);
+      } else {
+        drawStaticSprite(obj.spriteKey, 0, 0, STATIC_SPRITE_SIZES[obj.spriteKey] || obj.size);
+      }
+      ctx.restore();
+    }
+
+    function drawMovingObstacle(obj) {
+      ctx.save();
+      ctx.translate(obj.x, obj.y);
+      ctx.rotate(obj.rotation || 0);
+      if (obj.spriteKey === "star") {
+        drawAnimatedSprite("star", gameState.frames.star, 0, 0, obj.size);
+      } else {
+        drawStaticSprite(obj.spriteKey, 0, 0, STATIC_SPRITE_SIZES[obj.spriteKey] || obj.size);
+      }
+      ctx.restore();
+    }
+
+    function drawObjects() {
+      for (const obj of gameState.objects) {
+        if (obj.spriteKey === "vaina") {
+          drawVaina(obj);
+        } else if (obj.type === "collect") {
+          drawCollectible(obj);
+        } else {
+          drawMovingObstacle(obj);
+        }
+      }
+    }
+
+    function drawParticles() {
+      for (const particle of gameState.particles) {
+        const alpha = Math.max(0, particle.life / particle.maxLife);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = particle.color;
+        ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+        ctx.restore();
+      }
+    }
+
+    function drawScene() {
+      drawBackground();
+      drawObjects();
+      drawParticles();
+      drawHamster();
+    }
+
+    function loop(now) {
+      const dt = Math.min(0.033, (now - gameState.lastTime) / 1000 || 0.016);
+      gameState.lastTime = now;
+
+      if (gameState.screen === "playing") {
+        gameState.animTime += dt;
+        updateAnimationFrames();
+        updatePlaying(dt);
+      }
+
+      drawScene();
+      syncHud();
+      requestAnimationFrame(loop);
+    }
+
+    function bootGame() {
+      if (booted) {
+        return;
+      }
+
+      booted = true;
+      gameState.lastTime = performance.now();
+      resizeCanvas();
+      showStartScreen();
+      requestAnimationFrame(loop);
+    }
+
+    function resizeCanvas() {
+      const rect = shell.getBoundingClientRect();
+      gameState.dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      gameState.width = rect.width;
+      gameState.height = rect.height;
+      canvas.width = Math.round(rect.width * gameState.dpr);
+      canvas.height = Math.round(rect.height * gameState.dpr);
+      ctx.setTransform(gameState.dpr, 0, 0, gameState.dpr, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      gameState.hamster.size = gameState.width < 600 ? 54 : 64;
+      resetHamsterPosition();
+      drawScene();
+    }
+
+    function handlePress() {
+      if (gameState.screen === "playing") {
+        gameState.input.holding = true;
+      }
+    }
+
+    function handleRelease() {
+      gameState.input.holding = false;
+    }
+
+    overlay.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("button[data-action]");
+      const giftButton = event.target.closest("button[data-gift]");
+
+      if (giftButton) {
+        gameState.selectedGift = giftButton.getAttribute("data-gift");
+        showRewardScreen();
+        return;
+      }
+
+      if (!actionButton) {
+        return;
+      }
+
+      const action = actionButton.getAttribute("data-action");
+      if (action === "level") {
+        jumpToLevel(Number(actionButton.getAttribute("data-level-index")));
+        return;
+      }
+
+      if (action === "start") {
+        startGame(false);
+      } else if (action === "fast") {
+        startGame(true);
+      } else if (action === "continue") {
+        startNextLevel();
+      } else if (action === "resume") {
+        resumeGame();
+      } else if (action === "retry") {
+        retryGame();
+      } else if (action === "menu") {
+        showStartScreen();
+      }
+    });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      handlePress();
+    });
+
+    window.addEventListener("pointerup", handleRelease);
+    window.addEventListener("pointercancel", handleRelease);
+
+    window.addEventListener("keydown", (event) => {
+      if (event.code === "Escape") {
+        event.preventDefault();
+        if (gameState.screen === "playing") {
+          showPauseScreen();
+        } else if (gameState.screen === "paused") {
+          resumeGame();
+        }
+        return;
+      }
+
+      if (event.code !== "Space") {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (gameState.screen === "start") {
+        startGame(false);
+      }
+
+      if (gameState.screen === "playing") {
+        gameState.input.holding = true;
+      }
+    });
+
+    window.addEventListener("keyup", (event) => {
+      if (event.code === "Space") {
+        event.preventDefault();
+        handleRelease();
+      }
+    });
+
+    window.addEventListener("blur", handleRelease);
+    window.addEventListener("resize", resizeCanvas);
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "run-my-hamter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jetpack Joyride-style hamster browser game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
