@@ -371,6 +371,29 @@
         .join("\n");
     }
 
+    function fitWrappedPixelText(text, maxWidth, maxHeight, preferredSize, minSize = 6, lineHeightRatio = 1.8) {
+      let size = preferredSize;
+      let wrapped = wrapPixelText(text, maxWidth, size);
+      let lineHeight = Math.round(size * lineHeightRatio);
+      let lines = wrapped.split("\n");
+      let height = lines.length * lineHeight;
+
+      while (size > minSize && height > maxHeight) {
+        size -= 1;
+        wrapped = wrapPixelText(text, maxWidth, size);
+        lineHeight = Math.round(size * lineHeightRatio);
+        lines = wrapped.split("\n");
+        height = lines.length * lineHeight;
+      }
+
+      return {
+        text: wrapped,
+        size,
+        lineHeight,
+        height
+      };
+    }
+
     function roundedRectPath(context, x, y, w, h, radius = 12) {
       const r = Math.min(radius, w / 2, h / 2);
       context.beginPath();
@@ -680,7 +703,7 @@
       });
     });
     photos.forEach((image, index) => {
-      queueImage(image, `photos/${index + 1}.png`);
+      queueImage(image, `photos/${index + 1}.jpg`);
     });
 
     const gameState = {
@@ -1719,7 +1742,15 @@
       const centerY = y + h / 2;
       const revealAlpha = Math.min(1, Math.max(0, openProgress));
       const bowSize = Math.max(18, Math.round(w / 8));
-      const labelSize = Math.max(9, Math.round(w / 18));
+      const fittedLabel = fitWrappedPixelText(
+        label,
+        w - 34,
+        h * 0.32,
+        Math.max(9, Math.round(w / 18)),
+        7,
+        1.75
+      );
+      const labelCenterY = y + h * 0.72;
 
       drawPanel(ctx, x, y, w, h, fill, PINK_DEEP, 4);
       ctx.fillStyle = PINK_DARK;
@@ -1731,8 +1762,8 @@
       if (revealAlpha > 0) {
         ctx.save();
         ctx.globalAlpha = revealAlpha;
-        pixelText(ctx, label, centerX, centerY + h * 0.16, labelSize, PINK_DEEP, {
-          lineHeight: Math.round(labelSize * 1.85)
+        pixelText(ctx, fittedLabel.text, centerX, labelCenterY, fittedLabel.size, PINK_DEEP, {
+          lineHeight: fittedLabel.lineHeight
         });
         ctx.restore();
       }
@@ -1773,8 +1804,8 @@
         rightY += (hashNoise(sample + 11.2) - 0.5) * 8;
       }
 
-      drawGiftBox("gift-reveal-record", "tocadiscos", "🎵\nTocadiscos", leftX, leftY, boxW, boxH, openProgress, clickable);
-      drawGiftBox("gift-reveal-parka", "parka", "🧥\nParka", rightX, rightY, boxW, boxH, openProgress, clickable);
+      drawGiftBox("gift-reveal-record", "tocadiscos", "🎵\nTocadiscos!!!! :O", leftX, leftY, boxW, boxH, openProgress, clickable);
+      drawGiftBox("gift-reveal-parka", "parka", "🧥\nParka 3 en 1 tipico de la hamter", rightX, rightY, boxW, boxH, openProgress, clickable);
 
       if (timer < 0.6) {
         ctx.fillStyle = `rgba(255,255,255,${1 - timer / 0.6})`;
@@ -1789,9 +1820,23 @@
 
       if (image && image.naturalWidth) {
         drawPanel(ctx, -w / 2, -h / 2, w, h, "rgba(255,245,249,0.96)");
-        roundedRectPath(ctx, -w / 2 + 10, -h / 2 + 10, w - 20, h - 20, 10);
+        const innerX = -w / 2 + 10;
+        const innerY = -h / 2 + 10;
+        const innerW = w - 20;
+        const innerH = h - 20;
+        const scale = Math.min(innerW / image.naturalWidth, innerH / image.naturalHeight);
+        const drawW = image.naturalWidth * scale;
+        const drawH = image.naturalHeight * scale;
+        const drawX = innerX + (innerW - drawW) / 2;
+        const drawY = innerY + (innerH - drawH) / 2;
+
+        ctx.save();
+        roundedRectPath(ctx, innerX, innerY, innerW, innerH, 10);
         ctx.clip();
-        ctx.drawImage(image, -w / 2 + 10, -h / 2 + 10, w - 20, h - 20);
+        ctx.fillStyle = "rgba(255,245,249,0.98)";
+        ctx.fillRect(innerX, innerY, innerW, innerH);
+        ctx.drawImage(image, drawX, drawY, drawW, drawH);
+        ctx.restore();
       } else {
         drawPanel(ctx, -w / 2, -h / 2, w, h, "rgba(255,245,249,0.92)");
         pixelText(ctx, "📷", 0, 0, Math.max(28, Math.round(w / 4.8)), PINK_DEEP);
@@ -1807,16 +1852,26 @@
       const photoScale = Math.max(0.62, Math.min(1.08, gameState.width / 980, gameState.height / 760));
       const photoW = 165 * photoScale;
       const photoH = 210 * photoScale;
-      const leftXTop = Math.max(24, 60 * photoScale);
-      const leftXBottom = Math.max(38, 80 * photoScale);
-      const rightXTop = gameState.width - photoW - Math.max(24, 60 * photoScale);
-      const rightXBottom = gameState.width - photoW - Math.max(38, 80 * photoScale);
-      const topYLeft = Math.max(70, 120 * photoScale);
-      const bottomYLeft = Math.min(gameState.height - photoH - 100, 340 * photoScale);
+      const photo1Ratio = 1280 / 960;
+      const photo2Ratio = 591 / 1280;
+      const photo1W = 240 * photoScale;
+      const photo1H = photo1W / photo1Ratio;
+      const photo2H = 312 * photoScale;
+      const photo2W = photo2H * photo2Ratio;
+      const photo4W = photoW * 1.15;
+      const photo4H = photoH * 1.15;
+      const leftXTop = Math.max(16, 34 * photoScale);
+      const leftXBottom = Math.max(28, 54 * photoScale);
+      const rightXTop = gameState.width - photoW - Math.max(26, 52 * photoScale);
+      const rightXBottom = gameState.width - photo4W - Math.max(18, 34 * photoScale);
+      const topYLeft = Math.max(66, 106 * photoScale);
+      const bottomYLeft = Math.min(gameState.height - photo2H - 56, 388 * photoScale);
       const topYRight = Math.max(54, 100 * photoScale);
-      const bottomYRight = Math.min(gameState.height - photoH - 110, 330 * photoScale);
-      const centerX = gameState.width * 0.5;
-      const textWidth = Math.min(400, Math.max(240, gameState.width - photoW * 2 - 90));
+      const bottomYRight = Math.min(gameState.height - photo4H - 82, 348 * photoScale);
+      const leftClusterRight = Math.max(leftXTop + photo1W, leftXBottom + photo2W);
+      const rightClusterLeft = Math.min(rightXTop, rightXBottom);
+      const centerX = (leftClusterRight + rightClusterLeft) / 2;
+      const textWidth = Math.min(420, Math.max(220, rightClusterLeft - leftClusterRight - 54));
       const titleSize = gameState.width < 720 ? 14 : 17;
       const giftSize = gameState.width < 720 ? 9 : 11;
       const generalSize = gameState.width < 720 ? 8 : 10;
@@ -1824,30 +1879,51 @@
       const giftLineHeight = gameState.width < 720 ? 22 : 26;
       const generalLineHeight = gameState.width < 720 ? 20 : 24;
       const titleY = Math.max(118, gameState.height * 0.19);
-      const giftY = Math.max(titleY + 132, gameState.height * 0.44);
-      const generalY = Math.min(gameState.height - 150, giftY + 150);
       const buttonW = Math.min(248, gameState.width - 40);
       const title = gameState.chosenGift === "tocadiscos"
-        ? "Tu regalo es\nun Tocadiscos 🎵"
-        : "Tu regalo es\nuna Parka 🧥";
+        ? "Tu regalo es\nun Tocadiscos :3 🎵"
+        : "Tu regalo es\nuna Parkita 3 en 1";
       const giftText = gameState.chosenGift === "tocadiscos"
         ? GIFT_TEXT_TOCADISCOS
         : GIFT_TEXT_PARKA;
+      const titleHeight = title.split("\n").length * titleLineHeight;
+      const titleTop = titleY - titleHeight / 2;
+      const fittedGiftText = fitWrappedPixelText(
+        giftText,
+        textWidth,
+        Math.max(120, gameState.height * 0.24),
+        giftSize,
+        Math.max(7, giftSize - 2),
+        giftLineHeight / giftSize
+      );
+      const giftTop = titleTop + titleHeight + 14;
+      const giftCenterY = giftTop + fittedGiftText.height / 2;
+      const generalTop = giftTop + fittedGiftText.height + 22;
+      const generalMaxHeight = Math.max(60, gameState.height - 128 - generalTop);
+      const fittedGeneralText = fitWrappedPixelText(
+        GIFT_TEXT_GENERAL,
+        textWidth,
+        generalMaxHeight,
+        generalSize,
+        Math.max(6, generalSize - 2),
+        generalLineHeight / generalSize
+      );
+      const generalCenterY = generalTop + fittedGeneralText.height / 2;
 
-      drawPhotoCard(photos[0], leftXTop, topYLeft, photoW, photoH, -8);
-      drawPhotoCard(photos[1], leftXBottom, bottomYLeft, photoW, photoH, 5);
+      drawPhotoCard(photos[0], leftXTop, topYLeft, photo1W, photo1H, -8);
+      drawPhotoCard(photos[1], leftXBottom, bottomYLeft, photo2W, photo2H, 5);
       drawPhotoCard(photos[2], rightXTop, topYRight, photoW, photoH, 6);
-      drawPhotoCard(photos[3], rightXBottom, bottomYRight, photoW, photoH, -9);
+      drawPhotoCard(photos[3], rightXBottom, bottomYRight, photo4W, photo4H, -9);
       drawUiParticles();
 
       pixelText(ctx, title, centerX, titleY, titleSize, PINK_DEEP, {
         lineHeight: titleLineHeight
       });
-      pixelText(ctx, wrapPixelText(giftText, textWidth, giftSize), centerX, giftY, giftSize, PURPLE_SOFT, {
-        lineHeight: giftLineHeight
+      pixelText(ctx, fittedGiftText.text, centerX, giftCenterY, fittedGiftText.size, PURPLE_SOFT, {
+        lineHeight: fittedGiftText.lineHeight
       });
-      pixelText(ctx, wrapPixelText(GIFT_TEXT_GENERAL, textWidth, generalSize), centerX, generalY, generalSize, PINK_DEEP      , {
-        lineHeight: generalLineHeight
+      pixelText(ctx, fittedGeneralText.text, centerX, generalCenterY, fittedGeneralText.size, PINK_DEEP, {
+        lineHeight: fittedGeneralText.lineHeight
       });
       drawButton("final-play-again", "↩ Jugar de nuevo", centerX - buttonW / 2, gameState.height - 78, buttonW, 44, {
         action: "menu",
